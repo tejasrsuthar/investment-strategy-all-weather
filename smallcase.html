@@ -61,7 +61,7 @@
     <!-- Strategies -->
     <section class="py-24 px-6">
         <div class="max-w-6xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-8">
+            <div class="grid lg:grid-cols-3 gap-8">
 
                 <!-- All-Weather Smallcase -->
                 <div class="card rounded-2xl overflow-hidden group flex flex-col">
@@ -76,18 +76,14 @@
                         </p>
                     </div>
                     <div class="p-8 bg-white flex-grow flex flex-col">
-                        <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="grid grid-cols-2 gap-4 mb-8">
                             <div>
                                 <p class="text-xs text-gray-400 uppercase font-bold mb-1">Target Return</p>
                                 <p class="text-lg font-semibold">9.0% - 10.5%</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Risk Level</p>
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Risk</p>
                                 <p class="text-lg font-semibold text-green-600">Low</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Liquidity</p>
-                                <p class="text-lg font-semibold">T+2</p>
                             </div>
                         </div>
                         <div class="space-y-4 mb-8 flex-grow">
@@ -96,65 +92,91 @@
                             <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Capital protection focused</span></div>
                         </div>
                         <div class="flex items-center justify-between pt-6 border-t border-gray-100 mt-auto">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/></svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-bold">Fees</p>
-                                    <p class="text-sm font-semibold">TBA</p>
-                                </div>
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold">Fees</p>
+                                <p class="text-sm font-semibold">TBA</p>
                             </div>
-                            <a href="all-weather-strategy.html" class="bg-gray-100 hover:bg-gray-200 text-black text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-full transition-colors">
+                            <a href="all-weather-strategy.html" class="bg-gray-100 hover:bg-gray-200 text-black text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-full transition-colors">
                                 View Details
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Trend Following Smallcase -->
+                <!-- Trend Following Conservative -->
+                <div class="card rounded-2xl overflow-hidden group flex flex-col border-blue-100">
+                    <div class="bg-gradient-to-br from-blue-50 to-white p-8 border-b border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="bg-blue-600 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded tracking-widest">Moderate</span>
+                            <span class="bg-amber-100 text-amber-700 text-[10px] font-bold uppercase px-3 py-1.5 rounded tracking-widest">Coming Soon</span>
+                        </div>
+                        <h3 class="serif text-3xl mb-3 text-gray-900 group-hover:text-blue-700 transition-colors">Trend Following <span class="block text-xl italic text-gray-500 mt-1">(Conservative)</span></h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            A quantitative, momentum-based approach that rides strong market trends in stable Large Cap stocks and shifts to safety during prolonged downturns.
+                        </p>
+                    </div>
+                    <div class="p-8 bg-white flex-grow flex flex-col">
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Target Return</p>
+                                <p class="text-lg font-semibold">11.0% - 14.0%</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Risk</p>
+                                <p class="text-lg font-semibold text-blue-500">Moderate</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 mb-8 flex-grow">
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Nifty 100 Universe</span></div>
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Dynamic cash allocation</span></div>
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">HWM Performance Fee</span></div>
+                        </div>
+                        <div class="flex items-center justify-between pt-6 border-t border-gray-100 mt-auto">
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold">Fees</p>
+                                <p class="text-sm font-semibold">TBA</p>
+                            </div>
+                            <a href="trend-following-conservative.html" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-full transition-colors">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trend Following Aggressive -->
                 <div class="card rounded-2xl overflow-hidden group flex flex-col">
                     <div class="bg-gradient-to-br from-gray-900 to-black p-8 border-b border-gray-800">
                         <div class="flex items-center justify-between mb-6">
                             <span class="bg-white/20 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded tracking-widest">Aggressive</span>
                             <span class="bg-amber-400/20 text-amber-300 text-[10px] font-bold uppercase px-3 py-1.5 rounded tracking-widest">Coming Soon</span>
                         </div>
-                        <h3 class="serif text-3xl mb-3 text-white">Trend Following Strategy</h3>
+                        <h3 class="serif text-3xl mb-3 text-white group-hover:text-gray-300 transition-colors">Trend Following <span class="block text-xl italic text-gray-400 mt-1">(Aggressive)</span></h3>
                         <p class="text-sm text-gray-400 leading-relaxed">
-                            A quantitative, momentum-based approach that rides strong market trends in Small &amp; Mid Cap stocks and shifts to safety during prolonged downturns.
+                            A quantitative, momentum-based approach that rides strong market trends in Mid &amp; Small Cap stocks and shifts to safety during prolonged downturns.
                         </p>
                     </div>
                     <div class="p-8 bg-white flex-grow flex flex-col">
-                        <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="grid grid-cols-2 gap-4 mb-8">
                             <div>
                                 <p class="text-xs text-gray-400 uppercase font-bold mb-1">Target Return</p>
-                                <p class="text-lg font-semibold">12.0% - 15.0%</p>
+                                <p class="text-lg font-semibold">15.0% - 18.0%</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Risk Level</p>
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Risk</p>
                                 <p class="text-lg font-semibold text-red-500">High</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Universe</p>
-                                <p class="text-lg font-semibold">SMC 250</p>
                             </div>
                         </div>
                         <div class="space-y-4 mb-8 flex-grow">
-                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">100% Rules-based quantitative model</span></div>
-                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Dynamic cash allocation during crashes</span></div>
-                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Performance fee only on High Water Mark</span></div>
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Mid/Small/Micro Universe</span></div>
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">Dynamic cash allocation</span></div>
+                            <div class="flex items-start gap-2"><span class="text-gray-400">▹</span><span class="text-sm text-gray-600">HWM Performance Fee</span></div>
                         </div>
                         <div class="flex items-center justify-between pt-6 border-t border-gray-100 mt-auto">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/></svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 uppercase font-bold">Fees</p>
-                                    <p class="text-sm font-semibold">TBA</p>
-                                </div>
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold">Fees</p>
+                                <p class="text-sm font-semibold">TBA</p>
                             </div>
-                            <a href="trend-following-strategy.html" class="bg-gray-900 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-full transition-colors">
+                            <a href="trend-following-aggressive.html" class="bg-gray-900 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-full transition-colors">
                                 View Details
                             </a>
                         </div>

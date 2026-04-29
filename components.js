@@ -109,7 +109,8 @@ function renderFooter() {
                     <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Strategies</h4>
                     <ul class="space-y-3">
                         <li><a href="all-weather-strategy.html" class="text-sm text-gray-500 hover:text-white transition-colors">All-Weather Strategy</a></li>
-                        <li><a href="trend-following-strategy.html" class="text-sm text-gray-500 hover:text-white transition-colors">Trend Following</a></li>
+                        <li><a href="trend-following-conservative.html" class="text-sm text-gray-500 hover:text-white transition-colors">Trend Following (Cons.)</a></li>
+                        <li><a href="trend-following-aggressive.html" class="text-sm text-gray-500 hover:text-white transition-colors">Trend Following (Agg.)</a></li>
                     </ul>
                 </div>
 
