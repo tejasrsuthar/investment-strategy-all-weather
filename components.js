@@ -39,9 +39,6 @@ function renderHeader(activePage) {
             <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center" aria-label="Toggle menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
             </button>
-            <a href="https://calendly.com/tejact2007/30min" target="_blank" class="hidden md:inline-block bg-black text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all rounded-full">
-                Schedule Call
-            </a>
         </div>
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
@@ -50,9 +47,6 @@ function renderHeader(activePage) {
                 const cls = isActive ? 'text-black font-bold' : 'text-gray-500 hover:text-black';
                 return `<a href="${link.href}" class="block text-sm uppercase tracking-widest ${cls}">${link.label}</a>`;
             }).join('\n            ')}
-            <a href="https://calendly.com/tejact2007/30min" target="_blank" class="block bg-black text-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-center rounded-full mt-4">
-                Schedule Call
-            </a>
         </div>
     </nav>`;
 
