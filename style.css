@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+/* Base Theme */
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #fdfdfd; 
+    color: #1a1a1a; 
+    scroll-behavior: smooth; 
+}
+
+/* Typography Utilities */
+.serif { 
+    font-family: 'Playfair Display', serif; 
+}
+
+.font-impact {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+}
+
+/* Layout Utilities */
+.card { 
+    background: white; 
+    border: 1px solid #e5e7eb; 
+    transition: all 0.3s ease; 
+}
+
+.card:hover { 
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08); 
+    border-color: #d1d5db; 
+}
+
+.bg-accent { 
+    background-color: #f8f9fa; 
+}
+
+/* Custom Gradients inspired by reference */
+.theme-gradient {
+    /* Soft mesh gradient: Warm amber -> white -> soft teal */
+    background: linear-gradient(135deg, rgba(254,243,199,0.7) 0%, rgba(255,255,255,1) 40%, rgba(204,251,241,0.5) 100%);
+}
+
+.bg-mustard {
+    background-color: #eec248; /* Exact mustard yellow from the reference */
+    color: black;
+}
+.bg-mustard:hover {
+    background-color: #dcb33f;
+}
