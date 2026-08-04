@@ -12,31 +12,57 @@
     <link rel="canonical" href="https://raghuvirconsultants.com/trend-following-aggressive.html">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        forest: {
+                            DEFAULT: '#0F2522',
+                            hover: '#0a1917',
+                            dark: '#07100F',
+                        },
+                        lime: {
+                            DEFAULT: '#CBE743',
+                            hover: '#b9d435',
+                        },
+                        sage: {
+                            DEFAULT: '#EDEEE9',
+                            hover: '#E3E5DC',
+                        },
+                        sand: '#FAF9F6',
+                        bordercolor: '#E2E4DC',
+                        textmuted: '#5E6967',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="antialiased">
+<body class="antialiased bg-sand text-forest">
 
     <div id="site-header" data-active="smallcase"></div>
 
     <!-- Breadcrumb -->
     <div class="pt-28 px-6 max-w-6xl mx-auto">
-        <div class="text-xs font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-            <a href="index.html" class="hover:text-black transition-colors">Home</a>
+        <div class="text-xs font-bold uppercase tracking-widest text-textmuted flex items-center gap-2">
+            <a href="index.html" class="hover:text-forest transition-colors">Home</a>
             <span>/</span>
-            <a href="smallcase.html" class="hover:text-black transition-colors">Smallcase</a>
+            <a href="smallcase.html" class="hover:text-forest transition-colors">Smallcase</a>
             <span>/</span>
-            <span class="text-black">TF Aggressive</span>
+            <span class="text-forest">TF Aggressive</span>
         </div>
     </div>
 
     <!-- Hero Section -->
-    <header class="pt-12 pb-20 px-6 theme-gradient border-b border-gray-100">
+    <header class="pt-12 pb-20 px-6 border-b border-bordercolor grid-overlay">
         <div class="max-w-4xl mx-auto text-center">
-            <span class="text-xs font-bold uppercase tracking-[0.3em] text-red-500 mb-6 block">High Growth • High Risk</span>
+            <span class="text-xs font-bold uppercase tracking-[0.3em] text-textmuted mb-6 block">High Growth • High Risk</span>
             <h1 class="mb-10 text-center">
-                <span class="serif italic block text-3xl md:text-4xl text-gray-600 mb-3">Trend Following</span>
-                <span class="serif text-5xl md:text-[80px] block text-gray-900 leading-none tracking-tight my-2">AGGRESSIVE</span>
+                <span class="block text-3xl md:text-4xl text-textmuted mb-3 font-semibold">Trend Following</span>
+                <span class="text-5xl md:text-[80px] block text-forest leading-none font-extrabold tracking-tight my-2">AGGRESSIVE</span>
             </h1>
-            <p class="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
+            <p class="text-xl text-textmuted max-w-2xl mx-auto leading-relaxed font-medium">
                 Discipline Over Prediction • Growth Through Math
             </p>
         </div>

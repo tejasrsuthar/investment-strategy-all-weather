@@ -11,6 +11,7 @@ function renderHeader(activePage) {
         { label: 'Home', href: 'index.html', id: 'home' },
         { label: 'Services', href: 'services.html', id: 'services' },
         { label: 'Smallcase', href: 'smallcase.html', id: 'smallcase' },
+        { label: 'Learn', href: 'learn.html', id: 'learn' },
         { label: 'About', href: 'about.html', id: 'about' },
         { label: 'Contact', href: 'contact.html', id: 'contact' },
     ];
@@ -18,35 +19,41 @@ function renderHeader(activePage) {
     const navLinksHTML = links.map(link => {
         const isActive = link.id === activePage;
         const cls = isActive
-            ? 'text-black font-bold transition-colors'
-            : 'hover:text-black transition-colors';
+            ? 'text-[#0F2522] font-semibold transition-colors'
+            : 'text-[#5E6967] hover:text-[#0F2522] transition-colors';
         return `<a href="${link.href}" class="${cls}">${link.label}</a>`;
     }).join('\n                ');
 
     nav.innerHTML = `
-    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100" role="navigation" aria-label="Main navigation">
+    <nav class="fixed w-full z-50 bg-[#FAF9F6]/80 backdrop-blur-md border-b border-[#E2E4DC]" role="navigation" aria-label="Main navigation">
         <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="index.html" class="flex items-center space-x-2" aria-label="Raghuvir Consultants Home">
-                <div class="w-8 h-8 bg-black rounded flex items-center justify-center">
-                    <span class="text-white font-bold text-xs">RC</span>
+                <div class="w-8 h-8 bg-[#0F2522] rounded flex items-center justify-center">
+                    <span class="text-[#CBE743] font-bold text-xs">RC</span>
                 </div>
-                <span class="font-semibold tracking-tight uppercase text-sm">Raghuvir Consultants</span>
+                <span class="font-bold tracking-tight uppercase text-xs text-[#0F2522]">Raghuvir Consultants</span>
             </a>
-            <div class="hidden md:flex space-x-8 text-xs font-medium uppercase tracking-widest text-gray-500">
+            <div class="hidden md:flex space-x-8 text-xs font-semibold uppercase tracking-widest">
                 ${navLinksHTML}
             </div>
+            <div class="hidden md:flex items-center">
+                <a href="contact.html" class="bg-[#0F2522] text-white text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full hover:bg-[#0a1917] transition-all">
+                    Get Started →
+                </a>
+            </div>
             <!-- Mobile menu button -->
-            <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center" aria-label="Toggle menu">
+            <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-[#0F2522]" aria-label="Toggle menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
             </button>
         </div>
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
+        <div id="mobile-menu" class="hidden md:hidden bg-[#FAF9F6] border-t border-[#E2E4DC] px-6 py-4 space-y-3">
             ${links.map(link => {
                 const isActive = link.id === activePage;
-                const cls = isActive ? 'text-black font-bold' : 'text-gray-500 hover:text-black';
+                const cls = isActive ? 'text-[#0F2522] font-bold' : 'text-[#5E6967] hover:text-[#0F2522]';
                 return `<a href="${link.href}" class="block text-sm uppercase tracking-widest ${cls}">${link.label}</a>`;
             }).join('\n            ')}
+            <a href="contact.html" class="block bg-[#0F2522] text-white text-xs font-bold uppercase tracking-widest px-5 py-3 rounded-full text-center mt-4">Get Started →</a>
         </div>
     </nav>`;
 
@@ -65,67 +72,65 @@ function renderFooter() {
     if (!footer) return;
 
     footer.innerHTML = `
-    <footer class="py-20 px-6 bg-black text-white" role="contentinfo">
+    <footer class="py-20 px-6 bg-[#0C1615] text-[#FAF9F6]" role="contentinfo">
         <div class="max-w-6xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                 <!-- Brand -->
                 <div class="md:col-span-1">
                     <a href="index.html" class="flex items-center space-x-2 mb-6 inline-flex" aria-label="Raghuvir Consultants Home">
-                        <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
-                            <span class="text-black font-bold text-xs">RC</span>
+                        <div class="w-8 h-8 bg-[#CBE743] rounded flex items-center justify-center">
+                            <span class="text-[#0F2522] font-bold text-xs">RC</span>
                         </div>
-                        <span class="font-semibold tracking-tight uppercase text-sm">Raghuvir Consultants</span>
+                        <span class="font-bold tracking-tight uppercase text-xs text-[#FAF9F6]">Raghuvir Consultants</span>
                     </a>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                        SEBI Registered Investment Advisor. Professional wealth advisory for high-net-worth individuals and professionals.
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        SEBI Registered Research Analyst. Independent, data-driven research for investors seeking an analytical edge.
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <span class="text-[10px] text-gray-600 bg-white/5 px-2 py-1 rounded">Ahmedabad</span>
-                        <span class="text-[10px] text-gray-600 bg-white/5 px-2 py-1 rounded">Mumbai</span>
-                        <span class="text-[10px] text-gray-600 bg-white/5 px-2 py-1 rounded">London</span>
+                        <span class="text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded">Ahmedabad</span>
+                        <span class="text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded">Mumbai</span>
+                        <span class="text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded">London</span>
                     </div>
                 </div>
 
                 <!-- Quick Links -->
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Quick Links</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-[#CBE743] mb-6">Quick Links</h4>
                     <ul class="space-y-3">
-                        <li><a href="index.html" class="text-sm text-gray-500 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="services.html" class="text-sm text-gray-500 hover:text-white transition-colors">Services</a></li>
-                        <li><a href="smallcase.html" class="text-sm text-gray-500 hover:text-white transition-colors">Smallcase</a></li>
-                        <li><a href="about.html" class="text-sm text-gray-500 hover:text-white transition-colors">About</a></li>
-                        <li><a href="contact.html" class="text-sm text-gray-500 hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="index.html" class="text-sm text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="services.html" class="text-sm text-gray-400 hover:text-white transition-colors">Research</a></li>
+                        <li><a href="smallcase.html" class="text-sm text-gray-400 hover:text-white transition-colors">Smallcase</a></li>
+                        <li><a href="learn.html" class="text-sm text-gray-400 hover:text-white transition-colors">Learn</a></li>
+                        <li><a href="about.html" class="text-sm text-gray-400 hover:text-white transition-colors">About</a></li>
+                        <li><a href="contact.html" class="text-sm text-gray-400 hover:text-white transition-colors">Contact</a></li>
                     </ul>
                 </div>
 
                 <!-- Strategies -->
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Strategies</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-[#CBE743] mb-6">Strategies</h4>
                     <ul class="space-y-3">
-                        <li><a href="all-weather-strategy.html" class="text-sm text-gray-500 hover:text-white transition-colors">All-Weather Strategy</a></li>
-                        <li><a href="trend-following-conservative.html" class="text-sm text-gray-500 hover:text-white transition-colors">Trend Following (Cons.)</a></li>
-                        <li><a href="trend-following-aggressive.html" class="text-sm text-gray-500 hover:text-white transition-colors">Trend Following (Agg.)</a></li>
+                        <li><a href="all-weather-strategy.html" class="text-sm text-gray-400 hover:text-white transition-colors">All-Weather Strategy</a></li>
+                        <li><a href="trend-following-conservative.html" class="text-sm text-gray-400 hover:text-white transition-colors">Trend Following (Cons.)</a></li>
+                        <li><a href="trend-following-aggressive.html" class="text-sm text-gray-400 hover:text-white transition-colors">Trend Following (Agg.)</a></li>
                     </ul>
                 </div>
 
-                <!-- CTA -->
+                <!-- Legal -->
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Confidential Advisory</p>
-                    <p class="text-2xl serif mb-6 italic">Secure your legacy.</p>
-                    <a href="contact.html" class="inline-block bg-white text-black px-8 py-3 font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all rounded-full">
-                        Get in Touch
-                    </a>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-[#CBE743] mb-6">Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="privacy.html" class="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="terms.html" class="text-sm text-gray-400 hover:text-white transition-colors">Disclaimer &amp; Terms</a></li>
+                        <li><a href="contact.html" class="text-sm text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
                 </div>
             </div>
 
             <!-- Bottom bar -->
             <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[10px] text-gray-600 uppercase tracking-widest">© 2026 Raghuvir Consultants. All Rights Reserved.</p>
-                <div class="flex space-x-6">
-                    <a href="terms.html" class="text-[10px] text-gray-600 uppercase tracking-widest hover:text-gray-400 transition-colors">Terms & Conditions</a>
-                    <a href="privacy.html" class="text-[10px] text-gray-600 uppercase tracking-widest hover:text-gray-400 transition-colors">Privacy Policy</a>
-                </div>
-                <p class="text-[10px] text-gray-600 uppercase tracking-widest">Investment is subject to market risks.</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest">© 2026 Raghuvir Consultants · SEBI RA Reg. No. INH-0000365254 · All Rights Reserved.</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest">Investment is subject to market risks. Read all documents carefully.</p>
             </div>
         </div>
     </footer>`;
