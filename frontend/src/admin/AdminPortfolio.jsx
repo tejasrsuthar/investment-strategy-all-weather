@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase, Plus } from 'lucide-react';
+import { Users, FileText, Briefcase, Plus, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 export default function AdminPortfolio() {
   const navigate = useNavigate();
@@ -8,10 +8,15 @@ export default function AdminPortfolio() {
   const role = localStorage.getItem('role');
 
   const [stocks, setStocks] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
+
+  // Search and Sort State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('ticker');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if (!token || role !== 'admin') {
@@ -19,16 +24,16 @@ export default function AdminPortfolio() {
       return;
     }
     fetchStocks();
-  }, [token, page]);
+  }, [token]);
 
   const fetchStocks = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio?page=${page}&limit=5`, {
+      // Fetch up to 1000 stocks to support client-side search & sorting
+      const res = await fetch(`http://localhost:8000/api/portfolio?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       setStocks(data.items || []);
-      setTotalPages(data.pages || 1);
     } catch (e) {
       console.error(e);
     }
@@ -57,6 +62,55 @@ export default function AdminPortfolio() {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  // Filtering
+  const filteredStocks = stocks.filter(stock => {
+    const query = searchQuery.toLowerCase();
+    return (
+      stock.ticker.toLowerCase().includes(query) ||
+      stock.name.toLowerCase().includes(query) ||
+      stock.transaction_type.toLowerCase().includes(query)
+    );
+  });
+
+  // Sorting
+  const sortedStocks = [...filteredStocks].sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+
+    if (typeof aVal === 'number') {
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+
+    aVal = (aVal || '').toString().toLowerCase();
+    bVal = (bVal || '').toString().toLowerCase();
+
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedStocks.length / itemsPerPage);
+  const paginatedStocks = sortedStocks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const SortIndicator = ({ field }) => {
+    if (sortField !== field) return null;
+    return sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 inline ml-1 text-forest" /> : <ArrowDown className="w-3.5 h-3.5 inline ml-1 text-forest" />;
+  };
+
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
       {/* Admin Menu Header */}
@@ -77,26 +131,44 @@ export default function AdminPortfolio() {
 
       <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
         <div>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <h2 className="text-2xl font-bold text-forest">Stocks Portfolio</h2>
-            <Link to="/admin/portfolio/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all">
-              <Plus className="w-4 h-4" /> Add Stock
-            </Link>
+            
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              {/* Search bar */}
+              <div className="relative w-full md:w-60">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textmuted" />
+                <input
+                  type="text"
+                  placeholder="Search stocks..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full pl-9 pr-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold"
+                />
+              </div>
+
+              <Link to="/admin/portfolio/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all whitespace-nowrap">
+                <Plus className="w-4 h-4" /> Add Stock
+              </Link>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest">
-                  <th className="py-3">Stock</th>
-                  <th className="py-3">Prices</th>
-                  <th className="py-3">Weight</th>
-                  <th className="py-3">Type</th>
-                  <th className="py-3 text-right">Actions</th>
+                <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest cursor-pointer select-none">
+                  <th className="py-3 hover:text-forest" onClick={() => handleSort('ticker')}>Stock <SortIndicator field="ticker" /></th>
+                  <th className="py-3 hover:text-forest" onClick={() => handleSort('entry_price')}>Prices <SortIndicator field="entry_price" /></th>
+                  <th className="py-3 hover:text-forest" onClick={() => handleSort('weightage')}>Weight <SortIndicator field="weightage" /></th>
+                  <th className="py-3 hover:text-forest" onClick={() => handleSort('transaction_type')}>Type <SortIndicator field="transaction_type" /></th>
+                  <th className="py-3 text-right cursor-default">Actions</th>
                 </tr>
               </thead>
               <tbody className="font-semibold">
-                {stocks.map((stock) => (
+                {paginatedStocks.map((stock) => (
                   <tr key={stock.id} className="border-b border-bordercolor/40">
                     <td className="py-4">
                       <span className="block font-bold text-forest">{stock.ticker}</span>
@@ -134,6 +206,13 @@ export default function AdminPortfolio() {
                     </td>
                   </tr>
                 ))}
+                {paginatedStocks.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center text-textmuted font-medium">
+                      No stocks matched your search query.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -143,16 +222,16 @@ export default function AdminPortfolio() {
         {totalPages > 1 && (
           <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
             <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Previous
             </button>
-            <span>Page {page} of {totalPages}</span>
+            <span>Page {currentPage} of {totalPages}</span>
             <button
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Next
@@ -206,7 +285,7 @@ export default function AdminPortfolio() {
           <div className="bg-white border border-bordercolor p-8 rounded-3xl w-full max-w-sm shadow-xl text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100 animate-pulse">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.567 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
             <h3 className="text-lg font-bold text-forest mb-2">Confirm Delete</h3>

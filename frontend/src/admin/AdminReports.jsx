@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase, MoreVertical, Plus } from 'lucide-react';
+import { Users, FileText, Briefcase, MoreVertical, Plus, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 export default function AdminReports() {
   const navigate = useNavigate();
@@ -8,11 +8,16 @@ export default function AdminReports() {
   const role = localStorage.getItem('role');
 
   const [reports, setReports] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
+
+  // Search and Sort State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('published_at');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if (!token || role !== 'admin') {
@@ -20,16 +25,16 @@ export default function AdminReports() {
       return;
     }
     fetchReports();
-  }, [token, page]);
+  }, [token]);
 
   const fetchReports = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/reports?page=${page}&limit=5`, {
+      // Fetch up to 1000 reports to support client-side search & sorting
+      const res = await fetch(`http://localhost:8000/api/reports?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       setReports(data.items || []);
-      setTotalPages(data.pages || 1);
     } catch (e) {
       console.error(e);
     }
@@ -80,6 +85,51 @@ export default function AdminReports() {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  // Filtering
+  const filteredReports = reports.filter(rep => {
+    const query = searchQuery.toLowerCase();
+    return (
+      rep.title.toLowerCase().includes(query) ||
+      rep.content.toLowerCase().includes(query) ||
+      rep.status.toLowerCase().includes(query)
+    );
+  });
+
+  // Sorting
+  const sortedReports = [...filteredReports].sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+
+    aVal = (aVal || '').toString().toLowerCase();
+    bVal = (bVal || '').toString().toLowerCase();
+
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedReports.length / itemsPerPage);
+  const paginatedReports = sortedReports.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const SortIndicator = ({ field }) => {
+    if (sortField !== field) return null;
+    return sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 inline ml-1 text-forest" /> : <ArrowDown className="w-3.5 h-3.5 inline ml-1 text-forest" />;
+  };
+
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
       {/* Admin Menu Header */}
@@ -100,15 +150,49 @@ export default function AdminReports() {
 
       <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-forest">Research Reports</h2>
-            <Link to="/admin/reports/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all">
-              <Plus className="w-4 h-4" /> Create Report
-            </Link>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-bold text-forest">Research Reports</h2>
+              {/* Sorting triggers */}
+              <div className="flex gap-2 text-[10px] font-bold uppercase tracking-wider text-textmuted select-none">
+                <span className="cursor-pointer hover:text-forest" onClick={() => handleSort('title')}>
+                  Sort Title <SortIndicator field="title" />
+                </span>
+                <span>•</span>
+                <span className="cursor-pointer hover:text-forest" onClick={() => handleSort('published_at')}>
+                  Sort Date <SortIndicator field="published_at" />
+                </span>
+                <span>•</span>
+                <span className="cursor-pointer hover:text-forest" onClick={() => handleSort('status')}>
+                  Sort Status <SortIndicator field="status" />
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              {/* Search bar */}
+              <div className="relative w-full md:w-60">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textmuted" />
+                <input
+                  type="text"
+                  placeholder="Search reports..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full pl-9 pr-4 py-2 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold"
+                />
+              </div>
+
+              <Link to="/admin/reports/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all whitespace-nowrap">
+                <Plus className="w-4 h-4" /> Create Report
+              </Link>
+            </div>
           </div>
           
           <div className="space-y-4">
-            {reports.map((report) => (
+            {paginatedReports.map((report) => (
               <div key={report.id} className="p-4 bg-sand border border-bordercolor rounded-2xl flex justify-between items-start">
                 <div className="flex-grow pr-4">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -199,6 +283,11 @@ export default function AdminReports() {
                 </div>
               </div>
             ))}
+            {paginatedReports.length === 0 && (
+              <div className="py-8 text-center text-textmuted font-medium">
+                No reports matched your search query.
+              </div>
+            )}
           </div>
         </div>
 
@@ -206,16 +295,16 @@ export default function AdminReports() {
         {totalPages > 1 && (
           <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
             <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Previous
             </button>
-            <span>Page {page} of {totalPages}</span>
+            <span>Page {currentPage} of {totalPages}</span>
             <button
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Next

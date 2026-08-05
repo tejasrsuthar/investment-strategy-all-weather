@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MoreVertical, Users, FileText, Briefcase } from 'lucide-react';
+import { MoreVertical, Users, FileText, Briefcase, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 export default function AdminInvestors() {
   const navigate = useNavigate();
@@ -8,10 +8,15 @@ export default function AdminInvestors() {
   const role = localStorage.getItem('role');
 
   const [investors, setInvestors] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [notification, setNotification] = useState(null);
+
+  // Search and Sort State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('username');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if (!token || role !== 'admin') {
@@ -19,16 +24,16 @@ export default function AdminInvestors() {
       return;
     }
     fetchInvestors();
-  }, [token, page]);
+  }, [token]);
 
   const fetchInvestors = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors?page=${page}&limit=5`, {
+      // Fetch up to 1000 investors to allow full client-side search & sorting
+      const res = await fetch(`http://localhost:8000/api/admin/investors?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       setInvestors(data.items || []);
-      setTotalPages(data.pages || 1);
     } catch (e) {
       console.error(e);
     }
@@ -61,6 +66,57 @@ export default function AdminInvestors() {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1); // Reset page on sort
+  };
+
+  // Filter logic
+  const filteredInvestors = investors.filter(inv => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (inv.username || '').toLowerCase().includes(query) ||
+      inv.email.toLowerCase().includes(query) ||
+      inv.role.toLowerCase().includes(query) ||
+      inv.status.toLowerCase().includes(query)
+    );
+  });
+
+  // Sort logic
+  const sortedInvestors = [...filteredInvestors].sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+
+    if (typeof aVal === 'boolean') {
+      aVal = aVal ? 1 : 0;
+      bVal = bVal ? 1 : 0;
+    } else {
+      aVal = (aVal || '').toString().toLowerCase();
+      bVal = (bVal || '').toString().toLowerCase();
+    }
+
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(sortedInvestors.length / itemsPerPage);
+  const paginatedInvestors = sortedInvestors.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const SortIndicator = ({ field }) => {
+    if (sortField !== field) return null;
+    return sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 inline ml-1 text-forest" /> : <ArrowDown className="w-3.5 h-3.5 inline ml-1 text-forest" />;
+  };
+
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
       {/* Admin Menu Header */}
@@ -81,21 +137,39 @@ export default function AdminInvestors() {
 
       {/* Main Directory Table */}
       <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm">
-        <h2 className="text-2xl font-bold mb-6 text-forest">Investor Directory</h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h2 className="text-2xl font-bold text-forest">Investor Directory</h2>
+          
+          {/* Search bar */}
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textmuted" />
+            <input
+              type="text"
+              placeholder="Search by name, email, status..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 pr-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest">
-                <th className="py-3">Investor</th>
-                <th className="py-3">Role</th>
-                <th className="py-3">Status</th>
-                <th className="py-3">Reports Sub</th>
-                <th className="py-3">Portfolio Sub</th>
-                <th className="py-3 text-right">Actions</th>
+              <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest cursor-pointer select-none">
+                <th className="py-3 hover:text-forest" onClick={() => handleSort('username')}>Investor <SortIndicator field="username" /></th>
+                <th className="py-3 hover:text-forest" onClick={() => handleSort('role')}>Role <SortIndicator field="role" /></th>
+                <th className="py-3 hover:text-forest" onClick={() => handleSort('status')}>Status <SortIndicator field="status" /></th>
+                <th className="py-3 hover:text-forest" onClick={() => handleSort('subscribed_reports')}>Reports Sub <SortIndicator field="subscribed_reports" /></th>
+                <th className="py-3 hover:text-forest" onClick={() => handleSort('subscribed_portfolio')}>Portfolio Sub <SortIndicator field="subscribed_portfolio" /></th>
+                <th className="py-3 text-right cursor-default">Actions</th>
               </tr>
             </thead>
             <tbody className="font-semibold">
-              {investors.map((inv) => (
+              {paginatedInvestors.map((inv) => (
                 <tr key={inv.id} className="border-b border-bordercolor/40">
                   <td className="py-4">
                     <span className="block font-bold text-forest">{inv.username || 'Google Account'}</span>
@@ -164,6 +238,13 @@ export default function AdminInvestors() {
                   </td>
                 </tr>
               ))}
+              {paginatedInvestors.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="py-8 text-center text-textmuted font-medium">
+                    No investors matched your search query.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -172,16 +253,16 @@ export default function AdminInvestors() {
         {totalPages > 1 && (
           <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
             <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Previous
             </button>
-            <span>Page {page} of {totalPages}</span>
+            <span>Page {currentPage} of {totalPages}</span>
             <button
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
               className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
               Next
