@@ -12,7 +12,7 @@ sub_repo = SubscriptionRepository()
 @router.get("/investors", response_model=PaginatedResponse)
 def list_investors(
     page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(10, ge=1, le=1000),
     admin: User = Depends(require_admin)
 ):
     users, total = user_repo.get_all_paginated(page, limit)

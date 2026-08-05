@@ -11,7 +11,7 @@ stock_repo = StockRepository()
 @router.get("", response_model=PaginatedResponse)
 def get_portfolio(
     page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(10, ge=1, le=1000),
     user: User = Depends(require_portfolio_subscription)
 ):
     stocks, total = stock_repo.get_all_paginated(page, limit)
