@@ -13,6 +13,7 @@ export default function AdminInvestors() {
 
   // Search and Sort State
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState('all');
   const [sortField, setSortField] = useState('username');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,15 +77,37 @@ export default function AdminInvestors() {
     setCurrentPage(1); // Reset page on sort
   };
 
+  const getDateLabel = (dateStr) => {
+    if (!dateStr) return '';
+    const dateObj = new Date(dateStr);
+    const dateString = dateObj.toDateString();
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    if (dateString === today) return "Today";
+    if (dateString === yesterday) return "Yesterday";
+    return dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  // Derive unique dates
+  const uniqueDates = Array.from(
+    new Set(investors.map(inv => getDateLabel(inv.created_at)).filter(Boolean))
+  );
+
   // Filter logic
   const filteredInvestors = investors.filter(inv => {
     const query = searchQuery.toLowerCase();
-    return (
+    const dateLabel = getDateLabel(inv.created_at);
+
+    const matchesSearch = (
       (inv.username || '').toLowerCase().includes(query) ||
       inv.email.toLowerCase().includes(query) ||
       inv.role.toLowerCase().includes(query) ||
       inv.status.toLowerCase().includes(query)
     );
+
+    const matchesDate = selectedDate === 'all' || dateLabel === selectedDate;
+    return matchesSearch && matchesDate;
   });
 
   // Sort logic
@@ -143,19 +166,36 @@ export default function AdminInvestors() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-forest">Investor Directory</h2>
           
-          {/* Search bar */}
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textmuted" />
-            <input
-              type="text"
-              placeholder="Search by name, email, status..."
-              value={searchQuery}
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            {/* Date filter dropdown */}
+            <select
+              value={selectedDate}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                setSelectedDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold"
-            />
+              className="px-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold text-textmuted"
+            >
+              <option value="all">All Days</option>
+              {uniqueDates.map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+
+            {/* Search bar */}
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textmuted" />
+              <input
+                type="text"
+                placeholder="Search by name, email, status..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 pr-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold"
+              />
+            </div>
           </div>
         </div>
 
@@ -175,7 +215,9 @@ export default function AdminInvestors() {
               {paginatedInvestors.map((inv) => (
                 <tr key={inv.id} className="border-b border-bordercolor/40">
                   <td className="py-4">
-                    <span className="block font-bold text-forest">{inv.username || 'Google Account'}</span>
+                    <Link to={`/admin/investors/${inv.id}`} className="block font-bold text-forest hover:underline">
+                      {inv.username || 'Google Account'}
+                    </Link>
                     <span className="text-[10px] text-textmuted font-normal">{inv.email}</span>
                   </td>
                   <td className="py-4 capitalize">{inv.role}</td>

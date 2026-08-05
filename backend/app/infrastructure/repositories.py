@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List, Tuple
-from app.domain.entities import User, ResearchReport, Stock, Subscription, UserStatus, UserRole
+from app.domain.entities import User, ResearchReport, Stock, Subscription, UserStatus, UserRole, ActivityLog
 from app.infrastructure.db import db
 
 class UserRepository:
@@ -156,3 +156,18 @@ class SubscriptionRepository:
             "expires_at": {"$gt": datetime.utcnow()}
         })
         return Subscription(**data) if data else None
+
+class ActivityLogRepository:
+    def __init__(self):
+        self.collection = db["activity_logs"]
+
+    def create(self, log: ActivityLog) -> ActivityLog:
+        log_dict = log.model_dump()
+        if not log_dict.get("id"):
+            log_dict["id"] = str(uuid.uuid4())
+        self.collection.insert_one(log_dict)
+        return ActivityLog(**log_dict)
+
+    def get_by_user_id(self, user_id: str) -> List[ActivityLog]:
+        cursor = self.collection.find({"user_id": user_id}).sort("timestamp", -1)
+        return [ActivityLog(**doc) for doc in cursor]

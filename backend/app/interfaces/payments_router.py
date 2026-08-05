@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from app.interfaces.dependencies import get_current_user
 from app.domain.entities import User, Subscription, ServiceType, SubscriptionStatus
+from app.infrastructure.logging_utils import log_activity
 from app.infrastructure.repositories import SubscriptionRepository
 from pydantic import BaseModel
 from datetime import datetime, timedelta
@@ -24,10 +25,8 @@ class UPIPaymentConfirmRequest(BaseModel):
 def initiate_checkout(req: CheckoutRequest, user: User = Depends(get_current_user)):
     # Stripe integration simulation / session initiation
     try:
-        # Create a mock or real Stripe Checkout Session
-        # In a real environment, you construct line items, success_url, cancel_url etc.
-        # We simulate creating the session and returning a redirect URL
         checkout_session_url = "https://checkout.stripe.com/pay/mock_session_id"
+        log_activity(user.id, user.username, "initiated_checkout", f"Initiated Stripe checkout for {req.service_type.value} service")
         return {
             "checkout_url": checkout_session_url,
             "stripe_session_id": "cs_test_mock_id",
@@ -38,9 +37,6 @@ def initiate_checkout(req: CheckoutRequest, user: User = Depends(get_current_use
 
 @router.post("/upi-confirm")
 def confirm_upi_payment(req: UPIPaymentConfirmRequest, user: User = Depends(get_current_user)):
-    # Standard UPI payment confirmation simulation.
-    # Typically, merchants receive callbacks or parse reference numbers.
-    # Here, we verify transaction_id and grant the subscription for 30 days.
     expires_at = datetime.utcnow() + timedelta(days=30)
     
     sub = Subscription(
@@ -51,6 +47,8 @@ def confirm_upi_payment(req: UPIPaymentConfirmRequest, user: User = Depends(get_
         expires_at=expires_at
     )
     sub_repo.create_or_update(sub)
+    log_activity(user.id, user.username, "upi_payment_submitted", f"Submitted UPI Tx ID {req.transaction_id} for {req.service_type.value} verification")
+    log_activity(user.id, user.username, "subscription_activated", f"Subscription activated for {req.service_type.value} service (UPI)")
     return {"message": "UPI payment verified. Subscription active.", "expires_at": expires_at}
 
 @router.post("/stripe-webhook")
@@ -86,5 +84,7 @@ async def stripe_webhook(request: Request, sig_header: str = Header(None)):
                 expires_at=expires_at
             )
             sub_repo.create_or_update(sub)
+            log_activity(user.id, user.username, "stripe_checkout_completed", f"Stripe Checkout completed (Session {session.get('id')})")
+            log_activity(user.id, user.username, "subscription_activated", "Subscription activated for REPORTS service (Stripe)")
             
     return {"status": "success"}

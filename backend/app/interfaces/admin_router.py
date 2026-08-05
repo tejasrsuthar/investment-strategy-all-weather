@@ -61,3 +61,35 @@ def update_investor_status(
          raise HTTPException(status_code=400, detail="Could not update status")
          
     return {"message": f"Investor status successfully updated to {req.status.value}"}
+
+@router.get("/investors/{investor_id}", response_model=InvestorListItem)
+def get_investor_detail(
+    investor_id: str,
+    admin: User = Depends(require_admin)
+):
+    user = user_repo.get_by_id(investor_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Investor not found")
+        
+    reports_sub = sub_repo.get_active_subscription(user.id, ServiceType.REPORTS.value)
+    portfolio_sub = sub_repo.get_active_subscription(user.id, ServiceType.PORTFOLIO.value)
+    
+    return InvestorListItem(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role,
+        status=user.status,
+        created_at=user.created_at,
+        subscribed_reports=reports_sub is not None,
+        subscribed_portfolio=portfolio_sub is not None
+    )
+
+@router.get("/investors/{investor_id}/activities")
+def get_investor_activities(
+    investor_id: str,
+    admin: User = Depends(require_admin)
+):
+    from app.infrastructure.repositories import ActivityLogRepository
+    activity_repo = ActivityLogRepository()
+    return activity_repo.get_by_user_id(investor_id)

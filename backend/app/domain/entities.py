@@ -65,3 +65,11 @@ class Subscription(BaseModel):
     stripe_subscription_id: Optional[str] = None
     upi_transaction_id: Optional[str] = None
     expires_at: datetime
+
+class ActivityLog(BaseModel):
+    id: Optional[str] = None
+    user_id: str
+    username: str
+    action: str
+    description: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)

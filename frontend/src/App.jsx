@@ -29,6 +29,7 @@ import AdminReportForm from './admin/AdminReportForm';
 import AdminPortfolioForm from './admin/AdminPortfolioForm';
 import AdminSettings from './admin/AdminSettings';
 import InvestorSettings from './investor/InvestorSettings';
+import AdminInvestorDetail from './admin/AdminInvestorDetail';
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/investor" element={<InvestorDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/investors" element={<AdminInvestors />} />
+            <Route path="/admin/investors/:id" element={<AdminInvestorDetail />} />
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/reports/create" element={<AdminReportForm />} />
             <Route path="/admin/reports/edit/:id" element={<AdminReportForm />} />

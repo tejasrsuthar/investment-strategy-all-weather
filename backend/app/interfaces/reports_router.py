@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.interfaces.schemas import ResearchReportCreate, ResearchReportResponse, PaginatedResponse, ReportStatusUpdateRequest
 from app.interfaces.dependencies import require_admin, require_reports_subscription
 from app.infrastructure.repositories import ResearchReportRepository
-from app.domain.entities import ResearchReport, User
+from app.domain.entities import ResearchReport, User, UserRole
+from app.infrastructure.logging_utils import log_activity
 import math
 
 router = APIRouter(prefix="/reports", tags=["Research Reports"])
@@ -14,6 +15,9 @@ def get_reports(
     limit: int = Query(10, ge=1, le=1000),
     user: User = Depends(require_reports_subscription)
 ):
+    if user.role == UserRole.INVESTOR:
+        log_activity(user.id, user.username, "viewed_reports", f"Viewed list of published research reports (Page {page})")
+        
     reports, total = report_repo.get_all_paginated(page, limit)
     pages = math.ceil(total / limit)
     

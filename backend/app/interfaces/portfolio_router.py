@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.interfaces.schemas import StockCreate, StockResponse, PaginatedResponse
 from app.interfaces.dependencies import require_admin, require_portfolio_subscription
 from app.infrastructure.repositories import StockRepository
-from app.domain.entities import Stock, User
+from app.domain.entities import Stock, User, UserRole
+from app.infrastructure.logging_utils import log_activity
 import math
 
 router = APIRouter(prefix="/portfolio", tags=["Model Portfolio"])
@@ -14,6 +15,9 @@ def get_portfolio(
     limit: int = Query(10, ge=1, le=1000),
     user: User = Depends(require_portfolio_subscription)
 ):
+    if user.role == UserRole.INVESTOR:
+        log_activity(user.id, user.username, "viewed_portfolio", f"Viewed model portfolio stocks list (Page {page})")
+        
     stocks, total = stock_repo.get_all_paginated(page, limit)
     pages = math.ceil(total / limit)
     

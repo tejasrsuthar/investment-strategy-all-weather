@@ -4,6 +4,7 @@ from app.interfaces.schemas import (
     GoogleLoginRequest, ForgotPasswordRequest, ResetPasswordRequest, ProfileUpdateRequest
 )
 from app.interfaces.dependencies import get_current_user
+from app.infrastructure.logging_utils import log_activity
 from app.infrastructure.repositories import UserRepository
 from app.domain.entities import User, UserRole, UserStatus
 from app.core.security import get_password_hash, verify_password, create_access_token
@@ -37,6 +38,7 @@ def register(req: UserRegisterRequest):
         status=UserStatus.ACTIVE
     )
     created_user = user_repo.create(user)
+    log_activity(created_user.id, created_user.username, "register", "Registered a new investor account without email")
     
     access_token = create_access_token(data={"sub": created_user.email, "role": created_user.role.value})
     return TokenResponse(
@@ -65,6 +67,7 @@ def login(req: UserLoginRequest):
         raise HTTPException(status_code=403, detail="Account is blacklisted")
         
     access_token = create_access_token(data={"sub": user.email, "role": user.role.value})
+    log_activity(user.id, user.username, "login", f"Logged in successfully as {user.role.value}")
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
@@ -98,6 +101,7 @@ def google_auth(req: GoogleLoginRequest):
         raise HTTPException(status_code=403, detail="Account is blacklisted")
         
     access_token = create_access_token(data={"sub": user.email, "role": user.role.value})
+    log_activity(user.id, user.username, "google_login", "Logged in using Google account authentication")
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
@@ -153,6 +157,7 @@ def update_profile(
     user_repo.update_profile(current_user.id, username=req.username, hashed_password=hashed_pwd)
     
     updated_user = user_repo.get_by_id(current_user.id)
+    log_activity(updated_user.id, updated_user.username, "updated_profile", "Updated profile settings or password")
     return {
         "message": "Profile updated successfully",
         "username": updated_user.username,
