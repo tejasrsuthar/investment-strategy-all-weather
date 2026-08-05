@@ -167,20 +167,26 @@ export default function AdminInvestors() {
           <h2 className="text-2xl font-bold text-forest">Investor Directory</h2>
           
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            {/* Date filter dropdown */}
-            <select
-              value={selectedDate}
-              onChange={(e) => {
-                setSelectedDate(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="px-4 py-2.5 bg-sand border border-bordercolor rounded-full focus:outline-none focus:border-forest text-xs font-semibold text-textmuted"
-            >
-              <option value="all">All Days</option>
+            {/* Date filter tabs (small size) */}
+            <div className="flex bg-[#EDEEE9]/40 p-1 rounded-full border border-bordercolor text-[10px] font-bold uppercase tracking-wider text-textmuted gap-1 items-center">
+              <button
+                type="button"
+                onClick={() => { setSelectedDate('all'); setCurrentPage(1); }}
+                className={`px-3 py-1.5 rounded-full transition-all ${selectedDate === 'all' ? 'bg-forest text-[#FAF9F6] shadow-xs' : 'hover:text-forest'}`}
+              >
+                All Days
+              </button>
               {uniqueDates.map(d => (
-                <option key={d} value={d}>{d}</option>
+                <button
+                  type="button"
+                  key={d}
+                  onClick={() => { setSelectedDate(d); setCurrentPage(1); }}
+                  className={`px-3 py-1.5 rounded-full transition-all ${selectedDate === d ? 'bg-forest text-[#FAF9F6] shadow-xs' : 'hover:text-forest'}`}
+                >
+                  {d}
+                </button>
               ))}
-            </select>
+            </div>
 
             {/* Search bar */}
             <div className="relative w-full md:w-64">
