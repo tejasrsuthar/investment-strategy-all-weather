@@ -6,8 +6,8 @@ from app.domain.entities import UserRole, UserStatus, ServiceType, SubscriptionS
 # Auth Schemas
 class UserRegisterRequest(BaseModel):
     username: str
-    email: EmailStr
     password: str
+    email: Optional[str] = None
 
 class UserLoginRequest(BaseModel):
     email: str

@@ -14,14 +14,22 @@ user_repo = UserRepository()
 
 @router.post("/register", response_model=TokenResponse)
 def register(req: UserRegisterRequest):
-    existing_user = user_repo.get_by_email(req.email)
+    # Uniqueness check for username
+    existing_username = user_repo.get_by_username(req.username)
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
+
+    # Generate placeholder email if not provided
+    email_to_use = req.email if req.email else f"{req.username}@rc.placeholder"
+
+    existing_user = user_repo.get_by_email(email_to_use)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email/Username already registered")
     
     hashed_pwd = get_password_hash(req.password)
     user = User(
         username=req.username,
-        email=req.email,
+        email=email_to_use,
         hashed_password=hashed_pwd,
         role=UserRole.INVESTOR,
         status=UserStatus.ACTIVE
