@@ -151,7 +151,7 @@ def update_investor_subscription_by_admin(
         sub = Subscription(
             user_id=investor_id,
             service_type=req.service_type,
-            status=SubscriptionStatus.INACTIVE,
+            status=SubscriptionStatus.EXPIRED,
             expires_at=datetime.utcnow() - timedelta(days=1)
         )
         sub_repo.create_or_update(sub)
