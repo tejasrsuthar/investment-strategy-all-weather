@@ -94,3 +94,8 @@ class PaginatedResponse(BaseModel):
     page: int
     limit: int
     pages: int
+
+# Profile Update Schema
+class ProfileUpdateRequest(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None

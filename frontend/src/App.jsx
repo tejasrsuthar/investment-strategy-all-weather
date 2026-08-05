@@ -27,6 +27,7 @@ import AdminReports from './admin/AdminReports';
 import AdminPortfolio from './admin/AdminPortfolio';
 import AdminReportForm from './admin/AdminReportForm';
 import AdminPortfolioForm from './admin/AdminPortfolioForm';
+import AdminSettings from './admin/AdminSettings';
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/admin/portfolio" element={<AdminPortfolio />} />
             <Route path="/admin/portfolio/create" element={<AdminPortfolioForm />} />
             <Route path="/admin/portfolio/edit/:id" element={<AdminPortfolioForm />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Routes>
         </main>
         <Footer />

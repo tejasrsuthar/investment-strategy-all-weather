@@ -35,6 +35,17 @@ class UserRepository:
         res = self.collection.update_one({"id": user_id}, {"$set": {"hashed_password": hashed_password}})
         return res.modified_count > 0
 
+    def update_profile(self, user_id: str, username: Optional[str] = None, hashed_password: Optional[str] = None) -> bool:
+        update_fields = {}
+        if username:
+            update_fields["username"] = username
+        if hashed_password:
+            update_fields["hashed_password"] = hashed_password
+        if not update_fields:
+            return False
+        res = self.collection.update_one({"id": user_id}, {"$set": update_fields})
+        return res.modified_count > 0
+
     def get_all_paginated(self, page: int, limit: int) -> Tuple[List[User], int]:
         total = self.collection.count_documents({})
         cursor = self.collection.find({}).skip((page - 1) * limit).limit(limit)

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.interfaces.schemas import (
     UserRegisterRequest, UserLoginRequest, TokenResponse, 
-    GoogleLoginRequest, ForgotPasswordRequest, ResetPasswordRequest
+    GoogleLoginRequest, ForgotPasswordRequest, ResetPasswordRequest, ProfileUpdateRequest
 )
+from app.interfaces.dependencies import get_current_user
 from app.infrastructure.repositories import UserRepository
 from app.domain.entities import User, UserRole, UserStatus
 from app.core.security import get_password_hash, verify_password, create_access_token
@@ -126,3 +127,21 @@ def reset_password(req: ResetPasswordRequest):
     hashed_pwd = get_password_hash(req.new_password)
     user_repo.update_password(user.id, hashed_pwd)
     return {"message": "Password updated successfully"}
+
+@router.put("/profile")
+def update_profile(
+    req: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user)
+):
+    hashed_pwd = None
+    if req.password:
+        hashed_pwd = get_password_hash(req.password)
+    
+    user_repo.update_profile(current_user.id, username=req.username, hashed_password=hashed_pwd)
+    
+    updated_user = user_repo.get_by_id(current_user.id)
+    return {
+        "message": "Profile updated successfully",
+        "username": updated_user.username,
+        "email": updated_user.email
+    }

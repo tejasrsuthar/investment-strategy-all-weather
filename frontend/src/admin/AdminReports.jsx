@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase, MoreVertical, Plus, ArrowUp, ArrowDown, Search } from 'lucide-react';
+import { Users, FileText, Briefcase, MoreVertical, Plus, ArrowUp, ArrowDown, Search, Settings } from 'lucide-react';
 
 export default function AdminReports() {
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ export default function AdminReports() {
       {/* Admin Menu Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-bordercolor pb-6 mb-8 gap-4">
         <h1 className="text-4xl font-extrabold text-forest">Admin Console</h1>
-        <div className="flex bg-[#EDEEE9]/50 p-1.5 rounded-full border border-bordercolor text-xs font-bold uppercase tracking-widest text-textmuted gap-2">
+        <div className="flex bg-[#EDEEE9]/50 p-1.5 rounded-full border border-bordercolor text-xs font-bold uppercase tracking-widest text-textmuted gap-2 flex-wrap">
           <Link to="/admin/investors" className="flex items-center gap-1.5 hover:text-forest px-5 py-2.5 rounded-full transition-all">
             <Users className="w-3.5 h-3.5" /> Investors
           </Link>
@@ -144,6 +144,9 @@ export default function AdminReports() {
           </Link>
           <Link to="/admin/portfolio" className="flex items-center gap-1.5 hover:text-forest px-5 py-2.5 rounded-full transition-all">
             <Briefcase className="w-3.5 h-3.5" /> Portfolio
+          </Link>
+          <Link to="/admin/settings" className="flex items-center gap-1.5 hover:text-forest px-5 py-2.5 rounded-full transition-all">
+            <Settings className="w-3.5 h-3.5" /> Settings
           </Link>
         </div>
       </div>
