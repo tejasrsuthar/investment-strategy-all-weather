@@ -10,7 +10,7 @@ class UserRegisterRequest(BaseModel):
     password: str
 
 class UserLoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class TokenResponse(BaseModel):

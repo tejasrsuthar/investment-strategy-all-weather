@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { z } from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z.string().min(3, { message: "Please enter a valid email or username." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
 });
 
@@ -101,13 +101,14 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Email Address</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Email or Username</label>
             <input
-              type="email"
+              type="text"
               required
+              placeholder="e.g. admin or investor@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest"
+              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
             />
           </div>
           <div>

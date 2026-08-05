@@ -23,6 +23,10 @@ class UserRepository:
         data = self.collection.find_one({"email": email})
         return User(**data) if data else None
 
+    def get_by_username(self, username: str) -> Optional[User]:
+        data = self.collection.find_one({"username": username})
+        return User(**data) if data else None
+
     def get_by_google_id(self, google_id: str) -> Optional[User]:
         data = self.collection.find_one({"google_id": google_id})
         return User(**data) if data else None

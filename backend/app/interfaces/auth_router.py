@@ -40,8 +40,11 @@ def register(req: UserRegisterRequest):
 @router.post("/login", response_model=TokenResponse)
 def login(req: UserLoginRequest):
     user = user_repo.get_by_email(req.email)
+    if not user:
+        user = user_repo.get_by_username(req.email)
+        
     if not user or not user.hashed_password:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect username/email or password")
     
     if not verify_password(req.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
