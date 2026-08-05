@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.interfaces.schemas import ResearchReportCreate, ResearchReportResponse, PaginatedResponse
+from app.interfaces.schemas import ResearchReportCreate, ResearchReportResponse, PaginatedResponse, ReportStatusUpdateRequest
 from app.interfaces.dependencies import require_admin, require_reports_subscription
 from app.infrastructure.repositories import ResearchReportRepository
 from app.domain.entities import ResearchReport, User
@@ -33,7 +33,7 @@ def create_report(
     req: ResearchReportCreate,
     admin: User = Depends(require_admin)
 ):
-    report = ResearchReport(title=req.title, content=req.content)
+    report = ResearchReport(title=req.title, content=req.content, status=req.status)
     created = report_repo.create(report)
     return ResearchReportResponse.model_validate(created)
 
@@ -44,6 +44,17 @@ def update_report(
     admin: User = Depends(require_admin)
 ):
     updated = report_repo.update(report_id, req.title, req.content)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return ResearchReportResponse.model_validate(updated)
+
+@router.put("/{report_id}/status", response_model=ResearchReportResponse)
+def update_report_status(
+    report_id: str,
+    req: ReportStatusUpdateRequest,
+    admin: User = Depends(require_admin)
+):
+    updated = report_repo.update_status(report_id, req.status.value)
     if not updated:
         raise HTTPException(status_code=404, detail="Report not found")
     return ResearchReportResponse.model_validate(updated)

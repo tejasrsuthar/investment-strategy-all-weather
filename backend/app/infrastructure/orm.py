@@ -25,6 +25,11 @@ class TransactionType(enum.Enum):
     BUY = "BUY"
     SELL = "SELL"
 
+class ReportStatus(enum.Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
 class UserORM(Base):
     __tablename__ = "users"
     
@@ -43,6 +48,7 @@ class ResearchReportORM(Base):
     id = Column(String, primary_key=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
+    status = Column(Enum(ReportStatus), default=ReportStatus.PUBLISHED)
     published_at = Column(DateTime, nullable=False)
 
 class StockORM(Base):

@@ -64,6 +64,13 @@ class ResearchReportRepository:
         )
         return self.get_by_id(report_id)
 
+    def update_status(self, report_id: str, status: str) -> Optional[ResearchReport]:
+        self.collection.update_one(
+            {"id": report_id},
+            {"$set": {"status": status}}
+        )
+        return self.get_by_id(report_id)
+
     def delete(self, report_id: str) -> bool:
         res = self.collection.delete_one({"id": report_id})
         return res.deleted_count > 0

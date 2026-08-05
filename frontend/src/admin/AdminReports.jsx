@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase } from 'lucide-react';
+import { Users, FileText, Briefcase, MoreVertical } from 'lucide-react';
 
 export default function AdminReports() {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ export default function AdminReports() {
   const [reports, setReports] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [reportForm, setReportForm] = useState({ id: '', title: '', content: '' });
   const [notification, setNotification] = useState(null);
 
@@ -84,6 +85,27 @@ export default function AdminReports() {
       showToast("Error", e.message, "error");
     }
   };
+  const handleReportStatus = async (id, status) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/reports/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        showToast("Status Updated", `Report status changed to ${status}.`, "success");
+        fetchReports();
+      } else {
+        const d = await res.json();
+        showToast("Update Failed", d.detail, "error");
+      }
+    } catch (err) {
+      showToast("Error", err.message, "error");
+    }
+  };
 
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
@@ -110,24 +132,85 @@ export default function AdminReports() {
             <div className="space-y-4">
               {reports.map((report) => (
                 <div key={report.id} className="p-4 bg-sand border border-bordercolor rounded-2xl flex justify-between items-start">
-                  <div>
-                    <h4 className="font-bold text-forest text-base mb-1">{report.title}</h4>
+                  <div className="flex-grow pr-4">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h4 className="font-bold text-forest text-base">{report.title}</h4>
+                      <span className={`px-2 py-0.5 rounded-full uppercase text-[8px] font-extrabold tracking-wider ${
+                        report.status === 'published' ? 'bg-green-100 text-green-800' :
+                        report.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-150 text-gray-600'
+                      }`}>
+                        {report.status}
+                      </span>
+                    </div>
                     <p className="text-xs text-textmuted mb-2 line-clamp-2">{report.content}</p>
                     <span className="text-[10px] text-textmuted font-semibold">Published: {new Date(report.published_at).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => setReportForm(report)}
-                      className="bg-transparent border border-bordercolor text-forest px-3 py-1 rounded text-[10px] font-bold uppercase hover:bg-sage/20 transition-all"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReport(report.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded text-[10px] font-bold uppercase hover:bg-red-700 transition-all"
-                    >
-                      Delete
-                    </button>
+                  <div className="relative flex shrink-0">
+                    <div className="inline-block text-left relative">
+                      <button
+                        onClick={() => setActiveDropdownId(activeDropdownId === report.id ? null : report.id)}
+                        className="text-textmuted hover:text-forest p-1 rounded-full hover:bg-sand/80 transition-colors"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      
+                      {activeDropdownId === report.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setActiveDropdownId(null)}></div>
+                          
+                          <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-white border border-bordercolor shadow-xl z-20 overflow-hidden text-left py-1">
+                            <button
+                              onClick={() => {
+                                setReportForm(report);
+                                setActiveDropdownId(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-semibold text-forest hover:bg-sand transition-colors text-left"
+                            >
+                              Edit Details
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleReportStatus(report.id, 'published');
+                                setActiveDropdownId(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-semibold text-green-700 hover:bg-green-50/50 transition-colors flex items-center gap-2 text-left"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-green-600"></span>
+                              Publish
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleReportStatus(report.id, 'draft');
+                                setActiveDropdownId(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-semibold text-yellow-700 hover:bg-yellow-50/50 transition-colors flex items-center gap-2 text-left"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                              Save Draft
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleReportStatus(report.id, 'archived');
+                                setActiveDropdownId(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-sand transition-colors flex items-center gap-2 text-left"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+                              Archive
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleDeleteReport(report.id);
+                                setActiveDropdownId(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors border-t border-bordercolor/40 text-left"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

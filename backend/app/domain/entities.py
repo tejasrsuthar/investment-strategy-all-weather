@@ -24,6 +24,11 @@ class TransactionType(str, Enum):
     BUY = "BUY"
     SELL = "SELL"
 
+class ReportStatus(str, Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
 class User(BaseModel):
     id: Optional[str] = None
     username: Optional[str] = None
@@ -38,6 +43,7 @@ class ResearchReport(BaseModel):
     id: Optional[str] = None
     title: str
     content: str
+    status: ReportStatus = ReportStatus.PUBLISHED
     published_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Stock(BaseModel):

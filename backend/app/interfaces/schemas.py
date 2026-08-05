@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, Field
-from app.domain.entities import UserRole, UserStatus, ServiceType, SubscriptionStatus, TransactionType
+from app.domain.entities import UserRole, UserStatus, ServiceType, SubscriptionStatus, TransactionType, ReportStatus
 
 # Auth Schemas
 class UserRegisterRequest(BaseModel):
@@ -34,15 +34,20 @@ class ResetPasswordRequest(BaseModel):
 class ResearchReportCreate(BaseModel):
     title: str
     content: str
+    status: Optional[ReportStatus] = ReportStatus.PUBLISHED
 
 class ResearchReportResponse(BaseModel):
     id: str
     title: str
     content: str
+    status: ReportStatus
     published_at: datetime
 
     class Config:
         from_attributes = True
+
+class ReportStatusUpdateRequest(BaseModel):
+    status: ReportStatus
 
 # Stock Schemas
 class StockCreate(BaseModel):
