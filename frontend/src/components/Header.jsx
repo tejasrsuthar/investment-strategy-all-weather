@@ -46,14 +46,6 @@ export default function Header() {
               </Link>
             );
           })}
-          {token && role === 'admin' && (
-            <Link
-              to="/admin"
-              className="text-textmuted hover:text-forest font-bold transition-colors"
-            >
-              Admin Console
-            </Link>
-          )}
         </div>
 
         <div className="hidden md:flex items-center space-x-4">
@@ -101,15 +93,6 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          {token && role === 'admin' && (
-            <Link
-              to="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm uppercase tracking-widest text-textmuted hover:text-forest"
-            >
-              Admin Console
-            </Link>
-          )}
           {token ? (
             <button
               onClick={() => {
