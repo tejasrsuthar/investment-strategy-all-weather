@@ -39,10 +39,12 @@ class UserRepository:
         res = self.collection.update_one({"id": user_id}, {"$set": {"hashed_password": hashed_password}})
         return res.modified_count > 0
 
-    def update_profile(self, user_id: str, username: Optional[str] = None, hashed_password: Optional[str] = None) -> bool:
+    def update_profile(self, user_id: str, username: Optional[str] = None, email: Optional[str] = None, hashed_password: Optional[str] = None) -> bool:
         update_fields = {}
         if username:
             update_fields["username"] = username
+        if email:
+            update_fields["email"] = email
         if hashed_password:
             update_fields["hashed_password"] = hashed_password
         if not update_fields:

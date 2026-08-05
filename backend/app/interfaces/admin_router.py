@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.interfaces.schemas import UserStatusUpdateRequest, InvestorListItem, PaginatedResponse
+from app.interfaces.schemas import (
+    UserStatusUpdateRequest, InvestorListItem, PaginatedResponse, 
+    AdminInvestorProfileUpdate, AdminInvestorSubscriptionUpdate
+)
 from app.interfaces.dependencies import require_admin
 from app.infrastructure.repositories import UserRepository, SubscriptionRepository
-from app.domain.entities import User, UserStatus, ServiceType
+from app.domain.entities import User, UserStatus, ServiceType, Subscription, SubscriptionStatus
+from datetime import datetime, timedelta
 import math
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
@@ -93,3 +97,64 @@ def get_investor_activities(
     from app.infrastructure.repositories import ActivityLogRepository
     activity_repo = ActivityLogRepository()
     return activity_repo.get_by_user_id(investor_id)
+
+@router.put("/investors/{investor_id}/profile")
+def update_investor_profile_by_admin(
+    investor_id: str,
+    req: AdminInvestorProfileUpdate,
+    admin: User = Depends(require_admin)
+):
+    from app.infrastructure.logging_utils import log_activity
+    user = user_repo.get_by_id(investor_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Investor not found")
+        
+    # check for username/email uniqueness if changed
+    clean_username = req.username.replace(" ", "")
+    if clean_username != user.username:
+        existing = user_repo.get_by_username(clean_username)
+        if existing:
+            raise HTTPException(status_code=400, detail="Username already taken")
+            
+    if req.email != user.email:
+        existing = user_repo.get_by_email(req.email)
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+    user_repo.update_profile(investor_id, username=clean_username, email=req.email)
+    log_activity(investor_id, clean_username, "admin_edit_profile", f"Admin updated profile details: username={clean_username}, email={req.email}")
+    return {"message": "Investor profile updated successfully"}
+
+@router.put("/investors/{investor_id}/subscriptions")
+def update_investor_subscription_by_admin(
+    investor_id: str,
+    req: AdminInvestorSubscriptionUpdate,
+    admin: User = Depends(require_admin)
+):
+    from app.infrastructure.logging_utils import log_activity
+    user = user_repo.get_by_id(investor_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Investor not found")
+
+    if req.active:
+        expires_at = datetime.utcnow() + timedelta(days=365) # 1 year subscription
+        sub = Subscription(
+            user_id=investor_id,
+            service_type=req.service_type,
+            status=SubscriptionStatus.ACTIVE,
+            expires_at=expires_at
+        )
+        sub_repo.create_or_update(sub)
+        log_activity(investor_id, user.username, "admin_activate_sub", f"Admin activated {req.service_type.value} subscription")
+    else:
+        # deactivate by expiring subscription
+        sub = Subscription(
+            user_id=investor_id,
+            service_type=req.service_type,
+            status=SubscriptionStatus.INACTIVE,
+            expires_at=datetime.utcnow() - timedelta(days=1)
+        )
+        sub_repo.create_or_update(sub)
+        log_activity(investor_id, user.username, "admin_deactivate_sub", f"Admin deactivated {req.service_type.value} subscription")
+
+    return {"message": f"Investor subscription for {req.service_type.value} updated successfully"}

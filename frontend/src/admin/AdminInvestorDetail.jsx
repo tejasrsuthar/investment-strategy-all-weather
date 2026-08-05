@@ -14,6 +14,11 @@ export default function AdminInvestorDetail() {
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, status: '', title: '', message: '' });
 
+  // Admin inline profile edit states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editUsername, setEditUsername] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+
   useEffect(() => {
     if (!token || role !== 'admin') {
       navigate('/login');
@@ -36,6 +41,8 @@ export default function AdminInvestorDetail() {
       if (res.ok) {
         const data = await res.json();
         setInvestor(data);
+        setEditUsername(data.username);
+        setEditEmail(data.email);
       } else {
         showToast("Error", "Failed to retrieve investor details", "error");
       }
@@ -76,6 +83,53 @@ export default function AdminInvestorDetail() {
       } else {
         const data = await res.json();
         showToast("Error", data.detail || "Failed to update status", "error");
+      }
+    } catch (e) {
+      showToast("Error", e.message, "error");
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ username: editUsername, email: editEmail })
+      });
+      if (res.ok) {
+        showToast("Success", "Investor details updated successfully", "success");
+        setIsEditing(false);
+        fetchInvestorDetails();
+        fetchInvestorActivities();
+      } else {
+        const data = await res.json();
+        showToast("Error", data.detail || "Failed to update details", "error");
+      }
+    } catch (e) {
+      showToast("Error", e.message, "error");
+    }
+  };
+
+  const handleToggleSubscription = async (serviceType, currentActive) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/subscriptions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ service_type: serviceType, active: !currentActive })
+      });
+      if (res.ok) {
+        showToast("Success", "Subscription status updated", "success");
+        fetchInvestorDetails();
+        fetchInvestorActivities();
+      } else {
+        const data = await res.json();
+        showToast("Error", data.detail || "Failed to update subscription", "error");
       }
     } catch (e) {
       showToast("Error", e.message, "error");
@@ -167,8 +221,57 @@ export default function AdminInvestorDetail() {
               {investor.username.substring(0, 2).toUpperCase()}
             </div>
             
-            <h2 className="text-xl font-bold text-forest mb-1">{investor.username}</h2>
-            <p className="text-xs text-textmuted mb-4">{investor.email}</p>
+            {isEditing ? (
+              <div className="space-y-3 mb-4 text-left">
+                <div>
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-textmuted">Username</label>
+                  <input
+                    type="text"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    className="w-full px-3 py-2 bg-sand border border-bordercolor rounded-xl text-xs font-semibold focus:outline-none focus:border-forest mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-textmuted">Email Address</label>
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-sand border border-bordercolor rounded-xl text-xs font-semibold focus:outline-none focus:border-forest mt-1"
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={handleSaveProfile}
+                    className="flex-1 bg-forest text-white py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-forest-hover transition-all"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditUsername(investor.username);
+                      setEditEmail(investor.email);
+                    }}
+                    className="flex-1 bg-transparent border border-bordercolor text-textmuted py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-sand transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-forest mb-1">{investor.username}</h2>
+                <p className="text-xs text-textmuted mb-4">{investor.email}</p>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-[10px] font-bold text-forest uppercase tracking-widest hover:underline mb-4 block mx-auto"
+                >
+                  Edit Profile Details
+                </button>
+              </>
+            )}
 
             <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
               investor.status === 'active' ? 'bg-green-100 text-green-800' :
@@ -232,9 +335,17 @@ export default function AdminInvestorDetail() {
                   <h4 className="text-xs font-bold text-forest">Research Reports</h4>
                   <p className="text-[9px] text-textmuted">SEBI advisory bulletins</p>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${investor.subscribed_reports ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-600'}`}>
-                  {investor.subscribed_reports ? 'Subscribed' : 'Inactive'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${investor.subscribed_reports ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-600'}`}>
+                    {investor.subscribed_reports ? 'Subscribed' : 'Inactive'}
+                  </span>
+                  <button
+                    onClick={() => handleToggleSubscription('reports', investor.subscribed_reports)}
+                    className="px-2.5 py-1 bg-white border border-bordercolor rounded-xl text-[9px] font-extrabold uppercase hover:bg-forest hover:text-[#FAF9F6] transition-all"
+                  >
+                    {investor.subscribed_reports ? 'Disable' : 'Enable'}
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-sand rounded-2xl border border-bordercolor/50">
@@ -242,9 +353,17 @@ export default function AdminInvestorDetail() {
                   <h4 className="text-xs font-bold text-forest">Model Portfolio</h4>
                   <p className="text-[9px] text-textmuted">Stock weights & types</p>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${investor.subscribed_portfolio ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-600'}`}>
-                  {investor.subscribed_portfolio ? 'Subscribed' : 'Inactive'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${investor.subscribed_portfolio ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-600'}`}>
+                    {investor.subscribed_portfolio ? 'Subscribed' : 'Inactive'}
+                  </span>
+                  <button
+                    onClick={() => handleToggleSubscription('portfolio', investor.subscribed_portfolio)}
+                    className="px-2.5 py-1 bg-white border border-bordercolor rounded-xl text-[9px] font-extrabold uppercase hover:bg-forest hover:text-[#FAF9F6] transition-all"
+                  >
+                    {investor.subscribed_portfolio ? 'Disable' : 'Enable'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

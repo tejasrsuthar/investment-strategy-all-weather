@@ -99,3 +99,11 @@ class PaginatedResponse(BaseModel):
 class ProfileUpdateRequest(BaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
+
+class AdminInvestorProfileUpdate(BaseModel):
+    username: str
+    email: str
+
+class AdminInvestorSubscriptionUpdate(BaseModel):
+    service_type: ServiceType
+    active: bool
