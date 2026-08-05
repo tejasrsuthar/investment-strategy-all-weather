@@ -46,12 +46,12 @@ export default function Header() {
               </Link>
             );
           })}
-          {token && (
+          {token && role === 'admin' && (
             <Link
-              to={role === 'admin' ? '/admin' : '/investor'}
+              to="/admin"
               className="text-textmuted hover:text-forest font-bold transition-colors"
             >
-              {role === 'admin' ? 'Admin Console' : 'Investor Portal'}
+              Admin Console
             </Link>
           )}
         </div>
@@ -101,13 +101,13 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          {token && (
+          {token && role === 'admin' && (
             <Link
-              to={role === 'admin' ? '/admin' : '/investor'}
+              to="/admin"
               onClick={() => setMobileMenuOpen(false)}
               className="block text-sm uppercase tracking-widest text-textmuted hover:text-forest"
             >
-              {role === 'admin' ? 'Admin Console' : 'Investor Portal'}
+              Admin Console
             </Link>
           )}
           {token ? (
