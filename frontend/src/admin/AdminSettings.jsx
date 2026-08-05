@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase, Settings } from 'lucide-react';
+import { Users, FileText, Briefcase, Settings, User as UserIcon, Shield, Sliders } from 'lucide-react';
 import { z } from 'zod';
 
 const profileSchema = z.object({
@@ -13,11 +13,19 @@ export default function AdminSettings() {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
+  const [activeTab, setActiveTab] = useState('profile');
   const [username, setUsername] = useState(localStorage.getItem('username') || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  // Preference fields (mock / future settings)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // Security fields
+  const [twoFactor, setTwoFactor] = useState(false);
 
   useEffect(() => {
     if (!token || role !== 'admin') {
@@ -34,7 +42,6 @@ export default function AdminSettings() {
     e.preventDefault();
     setError('');
 
-    // Zod validation
     const validationResult = profileSchema.safeParse({ username, password });
     if (!validationResult.success) {
       setError(validationResult.error.errors[0].message);
@@ -77,7 +84,7 @@ export default function AdminSettings() {
       {/* Admin Menu Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-bordercolor pb-6 mb-8 gap-4">
         <h1 className="text-4xl font-extrabold text-forest">Admin Console</h1>
-        <div className="flex bg-[#EDEEE9]/50 p-1.5 rounded-full border border-bordercolor text-xs font-bold uppercase tracking-widest text-textmuted gap-2">
+        <div className="flex bg-[#EDEEE9]/50 p-1.5 rounded-full border border-bordercolor text-xs font-bold uppercase tracking-widest text-textmuted gap-2 flex-wrap">
           <Link to="/admin/investors" className="flex items-center gap-1.5 hover:text-forest px-5 py-2.5 rounded-full transition-all">
             <Users className="w-3.5 h-3.5" /> Investors
           </Link>
@@ -93,46 +100,159 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto bg-white border border-bordercolor p-8 rounded-3xl shadow-sm">
-        <h2 className="text-2xl font-bold mb-2 text-forest text-center">Profile Settings</h2>
-        <p className="text-xs text-textmuted text-center mb-6">Update your administrative credentials</p>
-
-        {error && (
-          <div className="p-4 mb-4 bg-red-50 text-red-600 rounded-xl text-xs border border-red-100 font-semibold">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleUpdateProfile} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Username</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">New Password (Optional)</label>
-            <input
-              type="password"
-              placeholder="Leave blank to keep current password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
-            />
-          </div>
+      <div className="bg-white border border-bordercolor rounded-3xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+        {/* Sidebar tabs */}
+        <div className="w-full md:w-64 bg-sand/30 border-r border-bordercolor/80 p-6 flex flex-col gap-2 shrink-0">
+          <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-textmuted mb-4 px-3">System Settings</h3>
+          
+          <button
+            onClick={() => { setActiveTab('profile'); setError(''); }}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+              activeTab === 'profile' ? 'bg-forest text-white shadow-sm' : 'text-textmuted hover:bg-sand/65 hover:text-forest'
+            }`}
+          >
+            <UserIcon className="w-4 h-4" /> Profile Settings
+          </button>
+          
+          <button
+            onClick={() => { setActiveTab('preferences'); setError(''); }}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+              activeTab === 'preferences' ? 'bg-forest text-white shadow-sm' : 'text-textmuted hover:bg-sand/65 hover:text-forest'
+            }`}
+          >
+            <Sliders className="w-4 h-4" /> Preferences
+          </button>
 
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-forest text-white py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-forest-hover transition-all disabled:opacity-50 mt-2"
+            onClick={() => { setActiveTab('security'); setError(''); }}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+              activeTab === 'security' ? 'bg-forest text-white shadow-sm' : 'text-textmuted hover:bg-sand/65 hover:text-forest'
+            }`}
           >
-            {loading ? 'Saving Changes...' : 'Save Settings'}
+            <Shield className="w-4 h-4" /> Security & API keys
           </button>
-        </form>
+        </div>
+
+        {/* Tab contents */}
+        <div className="flex-grow p-8">
+          {error && (
+            <div className="p-4 mb-6 bg-red-50 text-red-600 rounded-xl text-xs border border-red-100 font-semibold max-w-lg">
+              {error}
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="max-w-lg">
+              <h2 className="text-xl font-bold text-forest mb-1">Profile Settings</h2>
+              <p className="text-xs text-textmuted mb-6">Modify login username and credential values</p>
+
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">New Password (Optional)</label>
+                  <input
+                    type="password"
+                    placeholder="Leave blank to keep current password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-forest text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-forest-hover transition-all disabled:opacity-50 mt-4 shadow-md"
+                >
+                  {loading ? 'Saving Changes...' : 'Save Settings'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'preferences' && (
+            <div className="max-w-lg">
+              <h2 className="text-xl font-bold text-forest mb-1">Preferences</h2>
+              <p className="text-xs text-textmuted mb-6">Configure system defaults and console preferences</p>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-sand border border-bordercolor/60 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-forest uppercase tracking-wider mb-0.5">Email Notifications</h4>
+                    <p className="text-[10px] text-textmuted font-medium">Receive weekly system updates and registration alerts</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={(e) => {
+                      setEmailNotifications(e.target.checked);
+                      showToast("Preference Updated", `Email notifications ${e.target.checked ? 'enabled' : 'disabled'}.`);
+                    }}
+                    className="w-4 h-4 accent-forest cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-sand border border-bordercolor/60 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-forest uppercase tracking-wider mb-0.5">Dark Mode (Experimental)</h4>
+                    <p className="text-[10px] text-textmuted font-medium">Apply dark shades across administration control grids</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={darkMode}
+                    onChange={(e) => {
+                      setDarkMode(e.target.checked);
+                      showToast("Theme Selected", `Console theme switched to ${e.target.checked ? 'Dark' : 'Light'} Mode.`);
+                    }}
+                    className="w-4 h-4 accent-forest cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="max-w-lg">
+              <h2 className="text-xl font-bold text-forest mb-1">Security & API Keys</h2>
+              <p className="text-xs text-textmuted mb-6">Manage system API keys and Multi-Factor security configurations</p>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-sand border border-bordercolor/60 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-forest uppercase tracking-wider mb-0.5">Two-Factor Authentication (2FA)</h4>
+                    <p className="text-[10px] text-textmuted font-medium">Protect the administration account using phone-based authenticator codes</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={twoFactor}
+                    onChange={(e) => {
+                      setTwoFactor(e.target.checked);
+                      showToast("Security Updated", `2FA setup ${e.target.checked ? 'initiated' : 'deactivated'}.`);
+                    }}
+                    className="w-4 h-4 accent-forest cursor-pointer"
+                  />
+                </div>
+
+                <div className="p-4 border border-bordercolor rounded-2xl space-y-3">
+                  <h4 className="text-xs font-bold text-forest uppercase tracking-wider">Access Token</h4>
+                  <div className="p-3 bg-sand rounded-xl border border-bordercolor text-[10px] font-mono select-all overflow-x-auto whitespace-pre-wrap break-all text-textmuted">
+                    {token.substring(0, 45)}...
+                  </div>
+                  <p className="text-[9px] text-textmuted font-semibold">Keep this token highly secure. It yields full administrative access rights.</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating Notifications */}
