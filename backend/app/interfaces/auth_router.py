@@ -14,13 +14,15 @@ user_repo = UserRepository()
 
 @router.post("/register", response_model=TokenResponse)
 def register(req: UserRegisterRequest):
+    clean_username = req.username.replace(" ", "")
+
     # Uniqueness check for username
-    existing_username = user_repo.get_by_username(req.username)
+    existing_username = user_repo.get_by_username(clean_username)
     if existing_username:
         raise HTTPException(status_code=400, detail="Username already taken")
 
     # Generate placeholder email if not provided
-    email_to_use = req.email if req.email else f"{req.username}@rc.placeholder"
+    email_to_use = req.email if req.email else f"{clean_username}@rc.placeholder"
 
     existing_user = user_repo.get_by_email(email_to_use)
     if existing_user:
@@ -28,7 +30,7 @@ def register(req: UserRegisterRequest):
     
     hashed_pwd = get_password_hash(req.password)
     user = User(
-        username=req.username,
+        username=clean_username,
         email=email_to_use,
         hashed_password=hashed_pwd,
         role=UserRole.INVESTOR,

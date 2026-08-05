@@ -18,8 +18,10 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
+    const cleanUsername = username.replace(/\s+/g, '');
+
     // Zod validation
-    const validationResult = signupSchema.safeParse({ username, password });
+    const validationResult = signupSchema.safeParse({ username: cleanUsername, password });
     if (!validationResult.success) {
       setError(validationResult.error.errors[0].message);
       return;
@@ -31,7 +33,7 @@ export default function Signup() {
       const res = await fetch('http://localhost:8000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: cleanUsername, password }),
       });
 
       if (!res.ok) {
