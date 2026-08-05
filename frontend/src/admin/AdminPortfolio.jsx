@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase } from 'lucide-react';
+import { Users, FileText, Briefcase, Plus } from 'lucide-react';
 
 export default function AdminPortfolio() {
   const navigate = useNavigate();
@@ -10,7 +10,6 @@ export default function AdminPortfolio() {
   const [stocks, setStocks] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [stockForm, setStockForm] = useState({ id: '', ticker: '', name: '', entry_price: '', target_price: '', stop_loss: '', weightage: '', transaction_type: 'BUY' });
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
 
@@ -38,41 +37,6 @@ export default function AdminPortfolio() {
   const showToast = (title, message, type = 'success') => {
     setNotification({ title, message, type });
     setTimeout(() => setNotification(null), 4000);
-  };
-
-  const handleSaveStock = async (e) => {
-    e.preventDefault();
-    const url = stockForm.id ? `http://localhost:8000/api/portfolio/stocks/${stockForm.id}` : 'http://localhost:8000/api/portfolio/stocks';
-    const method = stockForm.id ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ticker: stockForm.ticker,
-          name: stockForm.name,
-          entry_price: parseFloat(stockForm.entry_price),
-          target_price: parseFloat(stockForm.target_price),
-          stop_loss: parseFloat(stockForm.stop_loss),
-          weightage: parseFloat(stockForm.weightage),
-          transaction_type: stockForm.transaction_type
-        })
-      });
-      if (res.ok) {
-        showToast("Stock Saved", `Stock has been successfully ${stockForm.id ? 'updated' : 'added'} to portfolio.`, "success");
-        setStockForm({ id: '', ticker: '', name: '', entry_price: '', target_price: '', stop_loss: '', weightage: '', transaction_type: 'BUY' });
-        fetchStocks();
-      } else {
-        const d = await res.json();
-        showToast("Save Failed", d.detail, "error");
-      }
-    } catch (err) {
-      showToast("Error", err.message, "error");
-    }
   };
 
   const handleDeleteStock = async (id) => {
@@ -111,189 +75,90 @@ export default function AdminPortfolio() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-forest">Stocks Portfolio</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest">
-                    <th className="py-2">Stock</th>
-                    <th className="py-2">Prices</th>
-                    <th className="py-2">Weight</th>
-                    <th className="py-2">Type</th>
-                    <th className="py-2 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="font-semibold">
-                  {stocks.map((stock) => (
-                    <tr key={stock.id} className="border-b border-bordercolor/40">
-                      <td className="py-3">
-                        <span className="block font-bold text-forest">{stock.ticker}</span>
-                        <span className="text-[10px] text-textmuted font-normal">{stock.name}</span>
-                      </td>
-                      <td className="py-3">
-                        <span className="block">Buy: ₹{stock.entry_price}</span>
-                        <span className="block text-[10px] text-green-700">Tgt: ₹{stock.target_price}</span>
-                        <span className="block text-[10px] text-red-600">SL: ₹{stock.stop_loss}</span>
-                      </td>
-                      <td className="py-3">{stock.weightage}%</td>
-                      <td className="py-3 capitalize">{stock.transaction_type}</td>
-                      <td className="py-3 text-right space-x-2">
-                        <button
-                          onClick={() => setStockForm(stock)}
-                          className="bg-transparent border border-bordercolor text-forest px-2 py-1 rounded text-[10px] font-bold uppercase hover:bg-sage/20 transition-all"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setConfirmModal({
-                              show: true,
-                              message: `Are you sure you want to remove ${stock.ticker} from the model portfolio?`,
-                              onConfirm: () => {
-                                handleDeleteStock(stock.id);
-                                setConfirmModal({ show: false, message: '', onConfirm: null });
-                              }
-                            });
-                          }}
-                          className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold uppercase hover:bg-red-700 transition-all"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+      <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-forest">Stocks Portfolio</h2>
+            <Link to="/admin/portfolio/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all">
+              <Plus className="w-4 h-4" /> Add Stock
+            </Link>
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <span>Page {page} of {totalPages}</span>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
-                className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-bordercolor text-textmuted uppercase tracking-widest">
+                  <th className="py-3">Stock</th>
+                  <th className="py-3">Prices</th>
+                  <th className="py-3">Weight</th>
+                  <th className="py-3">Type</th>
+                  <th className="py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="font-semibold">
+                {stocks.map((stock) => (
+                  <tr key={stock.id} className="border-b border-bordercolor/40">
+                    <td className="py-4">
+                      <span className="block font-bold text-forest">{stock.ticker}</span>
+                      <span className="text-[10px] text-textmuted font-normal">{stock.name}</span>
+                    </td>
+                    <td className="py-4">
+                      <span className="block">Buy: ₹{stock.entry_price}</span>
+                      <span className="block text-[10px] text-green-700">Tgt: ₹{stock.target_price}</span>
+                      <span className="block text-[10px] text-red-600">SL: ₹{stock.stop_loss}</span>
+                    </td>
+                    <td className="py-4">{stock.weightage}%</td>
+                    <td className="py-4 capitalize">{stock.transaction_type}</td>
+                    <td className="py-4 text-right space-x-2">
+                      <button
+                        onClick={() => navigate(`/admin/portfolio/edit/${stock.id}`)}
+                        className="bg-transparent border border-bordercolor text-forest px-3 py-1.5 rounded-full text-[10px] font-bold uppercase hover:bg-sage/20 transition-all"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setConfirmModal({
+                            show: true,
+                            message: `Are you sure you want to remove ${stock.ticker} from the model portfolio?`,
+                            onConfirm: () => {
+                              handleDeleteStock(stock.id);
+                              setConfirmModal({ show: false, message: '', onConfirm: null });
+                            }
+                          });
+                        }}
+                        className="bg-red-600 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase hover:bg-red-700 transition-all"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        {/* Create/Edit Form Card */}
-        <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm h-fit">
-          <h3 className="text-xl font-bold mb-6 text-forest">{stockForm.id ? 'Edit Stock' : 'Add Stock'}</h3>
-          <form onSubmit={handleSaveStock} className="space-y-3">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-0.5">Ticker</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. RELIANCE"
-                value={stockForm.ticker}
-                onChange={(e) => setStockForm({ ...stockForm, ticker: e.target.value })}
-                className="w-full px-3 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-0.5">Company Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Reliance Industries"
-                value={stockForm.name}
-                onChange={(e) => setStockForm({ ...stockForm, name: e.target.value })}
-                className="w-full px-3 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-textmuted mb-0.5">Entry (₹)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={stockForm.entry_price}
-                  onChange={(e) => setStockForm({ ...stockForm, entry_price: e.target.value })}
-                  className="w-full px-2 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-textmuted mb-0.5">Target (₹)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={stockForm.target_price}
-                  onChange={(e) => setStockForm({ ...stockForm, target_price: e.target.value })}
-                  className="w-full px-2 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-textmuted mb-0.5">SL (₹)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={stockForm.stop_loss}
-                  onChange={(e) => setStockForm({ ...stockForm, stop_loss: e.target.value })}
-                  className="w-full px-2 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-textmuted mb-0.5">Weight (%)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={stockForm.weightage}
-                  onChange={(e) => setStockForm({ ...stockForm, weightage: e.target.value })}
-                  className="w-full px-2 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-textmuted mb-0.5">Action</label>
-                <select
-                  value={stockForm.transaction_type}
-                  onChange={(e) => setStockForm({ ...stockForm, transaction_type: e.target.value })}
-                  className="w-full px-2 py-2 bg-sand border border-bordercolor rounded-xl focus:outline-none text-xs font-bold"
-                >
-                  <option value="BUY">BUY</option>
-                  <option value="SELL">SELL</option>
-                </select>
-              </div>
-            </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
             <button
-              type="submit"
-              className="w-full btn-forest text-white py-3 rounded-full text-xs font-bold uppercase tracking-widest mt-2 hover:bg-forest-hover transition-all"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
-              {stockForm.id ? 'Update Stock' : 'Add Stock'}
+              Previous
             </button>
-            {stockForm.id && (
-              <button
-                type="button"
-                onClick={() => setStockForm({ id: '', ticker: '', name: '', entry_price: '', target_price: '', stop_loss: '', weightage: '', transaction_type: 'BUY' })}
-                className="w-full bg-transparent text-textmuted py-1 text-xs font-bold uppercase hover:underline"
-              >
-                Cancel
-              </button>
-            )}
-          </form>
-        </div>
+            <span>Page {page} of {totalPages}</span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Floating Notifications */}

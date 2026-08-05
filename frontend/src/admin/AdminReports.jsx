@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileText, Briefcase, MoreVertical } from 'lucide-react';
+import { Users, FileText, Briefcase, MoreVertical, Plus } from 'lucide-react';
 
 export default function AdminReports() {
   const navigate = useNavigate();
@@ -11,7 +11,6 @@ export default function AdminReports() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
-  const [reportForm, setReportForm] = useState({ id: '', title: '', content: '' });
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
 
@@ -41,27 +40,22 @@ export default function AdminReports() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleSaveReport = async (e) => {
-    e.preventDefault();
-    const url = reportForm.id ? `http://localhost:8000/api/reports/${reportForm.id}` : 'http://localhost:8000/api/reports';
-    const method = reportForm.id ? 'PUT' : 'POST';
-
+  const handleReportStatus = async (id, status) => {
     try {
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`http://localhost:8000/api/reports/${id}/status`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ title: reportForm.title, content: reportForm.content })
+        body: JSON.stringify({ status })
       });
       if (res.ok) {
-        showToast("Report Saved", `Report has been successfully ${reportForm.id ? 'updated' : 'published'}.`, "success");
-        setReportForm({ id: '', title: '', content: '' });
+        showToast("Status Updated", `Report status changed to ${status}.`, "success");
         fetchReports();
       } else {
         const d = await res.json();
-        showToast("Save Failed", d.detail, "error");
+        showToast("Update Failed", d.detail, "error");
       }
     } catch (err) {
       showToast("Error", err.message, "error");
@@ -85,27 +79,6 @@ export default function AdminReports() {
       showToast("Error", e.message, "error");
     }
   };
-  const handleReportStatus = async (id, status) => {
-    try {
-      const res = await fetch(`http://localhost:8000/api/reports/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status })
-      });
-      if (res.ok) {
-        showToast("Status Updated", `Report status changed to ${status}.`, "success");
-        fetchReports();
-      } else {
-        const d = await res.json();
-        showToast("Update Failed", d.detail, "error");
-      }
-    } catch (err) {
-      showToast("Error", err.message, "error");
-    }
-  };
 
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
@@ -125,168 +98,130 @@ export default function AdminReports() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-forest">Published Reports</h2>
-            <div className="space-y-4">
-              {reports.map((report) => (
-                <div key={report.id} className="p-4 bg-sand border border-bordercolor rounded-2xl flex justify-between items-start">
-                  <div className="flex-grow pr-4">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h4 className="font-bold text-forest text-base">{report.title}</h4>
-                      <span className={`px-2 py-0.5 rounded-full uppercase text-[8px] font-extrabold tracking-wider ${
-                        report.status === 'published' ? 'bg-green-100 text-green-800' :
-                        report.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-150 text-gray-600'
-                      }`}>
-                        {report.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-textmuted mb-2 line-clamp-2">{report.content}</p>
-                    <span className="text-[10px] text-textmuted font-semibold">Published: {new Date(report.published_at).toLocaleDateString()}</span>
+      <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm flex flex-col justify-between min-h-[500px]">
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-forest">Research Reports</h2>
+            <Link to="/admin/reports/create" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all">
+              <Plus className="w-4 h-4" /> Create Report
+            </Link>
+          </div>
+          
+          <div className="space-y-4">
+            {reports.map((report) => (
+              <div key={report.id} className="p-4 bg-sand border border-bordercolor rounded-2xl flex justify-between items-start">
+                <div className="flex-grow pr-4">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h4 className="font-bold text-forest text-base">{report.title}</h4>
+                    <span className={`px-2 py-0.5 rounded-full uppercase text-[8px] font-extrabold tracking-wider ${
+                      report.status === 'published' ? 'bg-green-100 text-green-800' :
+                      report.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-150 text-gray-600'
+                    }`}>
+                      {report.status}
+                    </span>
                   </div>
-                  <div className="relative flex shrink-0">
-                    <div className="inline-block text-left relative">
-                      <button
-                        onClick={() => setActiveDropdownId(activeDropdownId === report.id ? null : report.id)}
-                        className="text-textmuted hover:text-forest p-1 rounded-full hover:bg-sand/80 transition-colors"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                      
-                      {activeDropdownId === report.id && (
-                        <>
-                          <div className="fixed inset-0 z-10" onClick={() => setActiveDropdownId(null)}></div>
-                          
-                          <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-white border border-bordercolor shadow-xl z-20 overflow-hidden text-left py-1">
-                            <button
-                              onClick={() => {
-                                setReportForm(report);
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-semibold text-forest hover:bg-sand transition-colors text-left"
-                            >
-                              Edit Details
-                            </button>
-                            <button
-                              onClick={() => {
-                                handleReportStatus(report.id, 'published');
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-semibold text-green-700 hover:bg-green-50/50 transition-colors flex items-center gap-2 text-left"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-green-600"></span>
-                              Publish
-                            </button>
-                            <button
-                              onClick={() => {
-                                handleReportStatus(report.id, 'draft');
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-semibold text-yellow-700 hover:bg-yellow-50/50 transition-colors flex items-center gap-2 text-left"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-                              Save Draft
-                            </button>
-                            <button
-                              onClick={() => {
-                                handleReportStatus(report.id, 'archived');
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-sand transition-colors flex items-center gap-2 text-left"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-gray-500"></span>
-                              Archive
-                            </button>
-                            <button
-                              onClick={() => {
-                                setConfirmModal({
-                                  show: true,
-                                  message: "Are you sure you want to delete this research report? This action cannot be undone.",
-                                  onConfirm: () => {
-                                    handleDeleteReport(report.id);
-                                    setConfirmModal({ show: false, message: '', onConfirm: null });
-                                  }
-                                });
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors border-t border-bordercolor/40 text-left"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                  <p className="text-xs text-textmuted mb-2 line-clamp-2">{report.content}</p>
+                  <span className="text-[10px] text-textmuted font-semibold">Published: {new Date(report.published_at).toLocaleDateString()}</span>
+                </div>
+                <div className="relative flex shrink-0">
+                  <div className="inline-block text-left relative">
+                    <button
+                      onClick={() => setActiveDropdownId(activeDropdownId === report.id ? null : report.id)}
+                      className="text-textmuted hover:text-forest p-1 rounded-full hover:bg-sand/80 transition-colors"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                    
+                    {activeDropdownId === report.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setActiveDropdownId(null)}></div>
+                        
+                        <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-white border border-bordercolor shadow-xl z-20 overflow-hidden text-left py-1">
+                          <button
+                            onClick={() => {
+                              navigate(`/admin/reports/edit/${report.id}`);
+                              setActiveDropdownId(null);
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-forest hover:bg-sand transition-colors text-left"
+                          >
+                            Edit Details
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleReportStatus(report.id, 'published');
+                              setActiveDropdownId(null);
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-green-700 hover:bg-green-50/50 transition-colors flex items-center gap-2 text-left"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-green-600"></span>
+                            Publish
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleReportStatus(report.id, 'draft');
+                              setActiveDropdownId(null);
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-yellow-700 hover:bg-yellow-50/50 transition-colors flex items-center gap-2 text-left"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                            Save Draft
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleReportStatus(report.id, 'archived');
+                              setActiveDropdownId(null);
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-sand transition-colors flex items-center gap-2 text-left"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+                            Archive
+                          </button>
+                          <button
+                            onClick={() => {
+                              setConfirmModal({
+                                show: true,
+                                message: "Are you sure you want to delete this research report? This action cannot be undone.",
+                                onConfirm: () => {
+                                  handleDeleteReport(report.id);
+                                  setConfirmModal({ show: false, message: '', onConfirm: null });
+                                }
+                              });
+                              setActiveDropdownId(null);
+                            }}
+                            className="w-full px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors border-t border-bordercolor/40 text-left"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <span>Page {page} of {totalPages}</span>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
-                className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Create/Edit Form Card */}
-        <div className="bg-white border border-bordercolor p-8 rounded-3xl shadow-sm h-fit">
-          <h3 className="text-xl font-bold mb-6 text-forest">{reportForm.id ? 'Edit Report' : 'Create Report'}</h3>
-          <form onSubmit={handleSaveReport} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Title</label>
-              <input
-                type="text"
-                required
-                value={reportForm.title}
-                onChange={(e) => setReportForm({ ...reportForm, title: e.target.value })}
-                className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Content</label>
-              <textarea
-                required
-                rows="5"
-                value={reportForm.content}
-                onChange={(e) => setReportForm({ ...reportForm, content: e.target.value })}
-                className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs"
-              ></textarea>
-            </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-textmuted">
             <button
-              type="submit"
-              className="w-full btn-forest text-white py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-forest-hover transition-all"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
             >
-              {reportForm.id ? 'Update Report' : 'Publish Report'}
+              Previous
             </button>
-            {reportForm.id && (
-              <button
-                type="button"
-                onClick={() => setReportForm({ id: '', title: '', content: '' })}
-                className="w-full bg-transparent text-textmuted py-2 text-xs font-bold uppercase hover:underline"
-              >
-                Cancel
-              </button>
-            )}
-          </form>
-        </div>
+            <span>Page {page} of {totalPages}</span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              className="bg-transparent border border-bordercolor px-4 py-2.5 rounded-full hover:bg-sand transition-colors disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Floating Notifications */}
