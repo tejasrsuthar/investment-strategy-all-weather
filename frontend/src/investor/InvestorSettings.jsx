@@ -1,0 +1,247 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Settings, Sliders, Shield, ArrowLeft } from 'lucide-react';
+import { z } from 'zod';
+
+const profileSchema = z.object({
+  password: z.string().min(6, { message: "Password must be at least 6 characters long." }).optional().or(z.literal('')),
+});
+
+export default function InvestorSettings() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  const [activeTab, setActiveTab] = useState('profile');
+  const [username] = useState(localStorage.getItem('username') || '');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  // Preference fields (mock / future settings)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // Security fields
+  const [twoFactor, setTwoFactor] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    }
+  }, [token]);
+
+  const showToast = (title, message, type = 'success') => {
+    setNotification({ title, message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const validationResult = profileSchema.safeParse({ password });
+    if (!validationResult.success) {
+      setError(validationResult.error.errors[0].message);
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter a new password to update.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('http://localhost:8000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          password
+        })
+      });
+
+      if (res.ok) {
+        showToast("Success", "Password updated successfully!", "success");
+        setPassword('');
+      } else {
+        const data = await res.json();
+        setError(data.detail || "Failed to update password");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b border-bordercolor pb-6 mb-8">
+        <div>
+          <Link to="/investor" className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-textmuted hover:text-forest transition-colors mb-2">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+          </Link>
+          <h1 className="text-4xl font-extrabold text-forest">Account Settings</h1>
+        </div>
+      </div>
+
+      <div className="bg-white border border-bordercolor rounded-3xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[480px]">
+        {/* Sidebar tabs */}
+        <div className="w-full md:w-64 bg-sand/30 border-r border-bordercolor/80 p-6 flex flex-col gap-2 shrink-0">
+          <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-textmuted mb-4 px-3">Investor Settings</h3>
+          
+          <button
+            onClick={() => { setActiveTab('profile'); setError(''); }}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+              activeTab === 'profile' ? 'bg-forest text-white shadow-sm' : 'text-textmuted hover:bg-sand/65 hover:text-forest'
+            }`}
+          >
+            <Shield className="w-4 h-4" /> Password & Profile
+          </button>
+          
+          <button
+            onClick={() => { setActiveTab('preferences'); setError(''); }}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+              activeTab === 'preferences' ? 'bg-forest text-white shadow-sm' : 'text-textmuted hover:bg-sand/65 hover:text-forest'
+            }`}
+          >
+            <Sliders className="w-4 h-4" /> Preferences
+          </button>
+        </div>
+
+        {/* Tab contents */}
+        <div className="flex-grow p-8">
+          {error && (
+            <div className="p-4 mb-6 bg-red-50 text-red-600 rounded-xl text-xs border border-red-100 font-semibold max-w-lg">
+              {error}
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="max-w-lg">
+              <h2 className="text-xl font-bold text-forest mb-1">Credentials & Profile</h2>
+              <p className="text-xs text-textmuted mb-6">Your profile details and password settings</p>
+
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Username (Immutable)</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={username}
+                    className="w-full px-4 py-3 bg-[#f0f0ed]/60 border border-bordercolor/80 rounded-xl text-xs font-semibold text-textmuted cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">New Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter new password (min 6 characters)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-forest text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-forest-hover transition-all disabled:opacity-50 mt-4 shadow-md"
+                >
+                  {loading ? 'Updating Password...' : 'Update Password'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'preferences' && (
+            <div className="max-w-lg">
+              <h2 className="text-xl font-bold text-forest mb-1">Preferences</h2>
+              <p className="text-xs text-textmuted mb-6">Configure subscription alerts and portal preferences</p>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-sand border border-bordercolor/60 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-forest uppercase tracking-wider mb-0.5">Email Notifications</h4>
+                    <p className="text-[10px] text-textmuted font-medium">Receive alerts when new SEBI research reports are published</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={(e) => {
+                      setEmailNotifications(e.target.checked);
+                      showToast("Preference Updated", `Email notifications ${e.target.checked ? 'enabled' : 'disabled'}.`);
+                    }}
+                    className="w-4 h-4 accent-forest cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-sand border border-bordercolor/60 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-forest uppercase tracking-wider mb-0.5">Dark Mode (Experimental)</h4>
+                    <p className="text-[10px] text-textmuted font-medium">Apply dark themes across investor advisory grids</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={darkMode}
+                    onChange={(e) => {
+                      setDarkMode(e.target.checked);
+                      showToast("Theme Selected", `Portal theme switched to ${e.target.checked ? 'Dark' : 'Light'} Mode.`);
+                    }}
+                    className="w-4 h-4 accent-forest cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Notifications */}
+      {notification && (
+        <div className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-50 justify-end">
+          <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white border border-bordercolor shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  {notification.type === 'success' ? (
+                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-3 w-0 flex-1 pt-0.5">
+                  <p className="text-xs font-bold text-forest uppercase tracking-wider">{notification.title}</p>
+                  <p className="mt-1 text-sm text-textmuted">{notification.message}</p>
+                </div>
+                <div className="ml-4 flex flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setNotification(null)}
+                    className="inline-flex rounded-md bg-white text-textmuted hover:text-forest focus:outline-none"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

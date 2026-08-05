@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function InvestorDashboard() {
   const navigate = useNavigate();
@@ -135,8 +135,15 @@ export default function InvestorDashboard() {
 
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
-      <h1 className="text-4xl font-extrabold text-forest mb-2">Investor Dashboard</h1>
-      <p className="text-sm text-textmuted mb-12">Welcome, {localStorage.getItem('username') || 'Investor'}</p>
+      <div className="flex justify-between items-end mb-12 flex-wrap gap-4 border-b border-bordercolor pb-6">
+        <div>
+          <h1 className="text-4xl font-extrabold text-forest mb-2">Investor Dashboard</h1>
+          <p className="text-sm text-textmuted">Welcome, {localStorage.getItem('username') || 'Investor'}</p>
+        </div>
+        <Link to="/investor/settings" className="btn-forest text-[#FAF9F6] text-xs font-bold uppercase tracking-widest px-6 py-3.5 rounded-full shadow-md flex items-center gap-1 hover:bg-forest-hover transition-all">
+          Account Settings
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Reports Panel */}
