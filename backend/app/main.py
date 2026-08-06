@@ -8,7 +8,7 @@ from app.core.security import get_password_hash
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="1.8.0"
+    version="1.9.0"
 )
 
 # Configure CORS
@@ -38,12 +38,14 @@ def seed_admin():
         admin_user = User(
             username="Admin",
             email=admin_email,
-            hashed_password=get_password_hash("adminpassword"),
+            hashed_password=get_password_hash("admin12345"),
             role=UserRole.ADMIN,
             status=UserStatus.ACTIVE
         )
         user_repo.create(admin_user)
         print("Admin user seeded successfully!")
+    else:
+        user_repo.update_password(existing.id, get_password_hash("admin12345"))
 
 @app.get("/")
 def read_root():
