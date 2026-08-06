@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Bell, CheckCircle2 } from 'lucide-react';
 
 export default function NotificationEditorPage({ initialData, onBack, onSaveSuccess }) {
@@ -40,11 +41,13 @@ export default function NotificationEditorPage({ initialData, onBack, onSaveSucc
       }
 
       setSuccess(true);
+      toast.success(editingId ? 'Broadcast alert updated' : 'Broadcast alert created & published');
       setTimeout(() => {
         if (onSaveSuccess) onSaveSuccess();
       }, 1000);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to save broadcast notification');
     } finally {
       setLoading(false);
     }

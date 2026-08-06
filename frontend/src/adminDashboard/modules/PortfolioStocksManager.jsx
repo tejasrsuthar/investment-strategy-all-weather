@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Briefcase, Plus, Trash2, Edit3, CheckSquare, Square, ArrowUpDown, Search } from 'lucide-react';
 import StockEditorPage from './StockEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
@@ -57,9 +58,12 @@ export default function PortfolioStocksManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchStocks(currentPage);
+      if (res.ok) {
+        toast.success('Portfolio stock holding deleted');
+        fetchStocks(currentPage);
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete stock holding');
     }
   };
 
@@ -95,10 +99,11 @@ export default function PortfolioStocksManager() {
         body: JSON.stringify({ ids: selectedIds })
       });
       if (res.ok) {
+        toast.success(`Deleted ${selectedIds.length} portfolio stock holdings`);
         fetchStocks(currentPage);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to execute bulk delete');
     } finally {
       setBulkActionLoading(false);
     }

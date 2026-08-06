@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { FileText, Plus, Trash2, Edit3, ExternalLink, CheckSquare, Square, ArrowUpDown, Search } from 'lucide-react';
 import ReportEditorPage from './ReportEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
@@ -64,9 +65,10 @@ export default function ResearchReportsManager() {
       });
       if (res.ok) {
         setReports(reports.map(r => r.id === id ? { ...r, status: newStatus } : r));
+        toast.success(`Report status updated to ${newStatus.toUpperCase()}`);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to update report status');
     }
   };
 
@@ -77,9 +79,12 @@ export default function ResearchReportsManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchReports(currentPage);
+      if (res.ok) {
+        toast.success('Research report deleted');
+        fetchReports(currentPage);
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete report');
     }
   };
 
@@ -114,10 +119,11 @@ export default function ResearchReportsManager() {
         body: JSON.stringify({ ids: selectedIds, status: newStatus })
       });
       if (res.ok) {
+        toast.success(`Updated status for ${selectedIds.length} reports to ${newStatus.toUpperCase()}`);
         fetchReports(currentPage);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to execute bulk status update');
     } finally {
       setBulkActionLoading(false);
     }
@@ -137,10 +143,11 @@ export default function ResearchReportsManager() {
         body: JSON.stringify({ ids: selectedIds })
       });
       if (res.ok) {
+        toast.success(`Deleted ${selectedIds.length} research reports`);
         fetchReports(currentPage);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to execute bulk delete');
     } finally {
       setBulkActionLoading(false);
     }

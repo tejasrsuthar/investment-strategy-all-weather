@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { User, Mail, Lock, Save, CheckCircle2, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 export default function AdminProfilePage({ onBack }) {
@@ -49,6 +50,7 @@ export default function AdminProfilePage({ onBack }) {
       const data = await res.json();
       if (res.ok) {
         setMessage('Profile updated successfully!');
+        toast.success('Admin profile credentials updated successfully');
         localStorage.setItem('username', data.username);
         setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       } else {
@@ -56,6 +58,7 @@ export default function AdminProfilePage({ onBack }) {
       }
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to update admin profile');
     } finally {
       setLoading(false);
     }

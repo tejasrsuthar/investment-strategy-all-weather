@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Briefcase, CheckCircle2 } from 'lucide-react';
 
 export default function StockEditorPage({ initialData, onBack, onSaveSuccess }) {
@@ -54,11 +55,13 @@ export default function StockEditorPage({ initialData, onBack, onSaveSuccess }) 
       }
 
       setSuccess(true);
+      toast.success(editingId ? 'Stock entry updated' : 'Stock entry added to portfolio');
       setTimeout(() => {
         if (onSaveSuccess) onSaveSuccess();
       }, 1000);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to save stock entry');
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Bell, Plus, Trash2, Edit3, CheckSquare, Square, RefreshCw, ShieldAlert } from 'lucide-react';
 import NotificationEditorPage from './NotificationEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
@@ -66,9 +67,10 @@ export default function NotificationsManager() {
       });
       if (res.ok) {
         setItems(items.map(i => i.id === id ? { ...i, status: newStatus } : i));
+        toast.success(`Alert status updated to ${newStatus.toUpperCase()}`);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to update alert status');
     }
   };
 
@@ -79,9 +81,12 @@ export default function NotificationsManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchItems(currentPage);
+      if (res.ok) {
+        toast.success('Alert notification deleted');
+        fetchItems(currentPage);
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete alert');
     }
   };
 
@@ -116,10 +121,11 @@ export default function NotificationsManager() {
         body: JSON.stringify({ ids: selectedIds, status: newStatus })
       });
       if (res.ok) {
+        toast.success(`Updated status for ${selectedIds.length} alerts to ${newStatus.toUpperCase()}`);
         fetchItems(currentPage);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to execute bulk status update');
     } finally {
       setBulkActionLoading(false);
     }
@@ -139,10 +145,11 @@ export default function NotificationsManager() {
         body: JSON.stringify({ ids: selectedIds })
       });
       if (res.ok) {
+        toast.success(`Deleted ${selectedIds.length} alerts successfully`);
         fetchItems(currentPage);
       }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to execute bulk delete');
     } finally {
       setBulkActionLoading(false);
     }

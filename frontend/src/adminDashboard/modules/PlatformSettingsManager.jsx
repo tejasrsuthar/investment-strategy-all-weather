@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, CheckCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { Settings, Save, CheckCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 export default function PlatformSettingsManager() {
   const [settings, setSettings] = useState({ default_page_size: 10, min_password_length: 7 });
@@ -54,9 +55,11 @@ export default function PlatformSettingsManager() {
       }
 
       setSaved(true);
+      toast.success('Platform configuration saved successfully');
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to update platform settings');
     }
   };
 

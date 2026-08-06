@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function ReportEditorPage({ initialData, onBack, onSaveSuccess }) {
@@ -41,11 +42,13 @@ export default function ReportEditorPage({ initialData, onBack, onSaveSuccess })
       }
 
       setSuccess(true);
+      toast.success(editingId ? 'Research report updated' : 'Research report published');
       setTimeout(() => {
         if (onSaveSuccess) onSaveSuccess();
       }, 1000);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to save research report');
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Sparkles, Plus, Trash2, Edit3 } from 'lucide-react';
 import ServiceEditorPage from './ServiceEditorPage';
 
@@ -38,9 +39,12 @@ export default function ServicesManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchItems();
+      if (res.ok) {
+        toast.success('Service offering deleted');
+        fetchItems();
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete service offering');
     }
   };
 

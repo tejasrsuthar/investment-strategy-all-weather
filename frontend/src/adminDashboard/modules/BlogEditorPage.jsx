@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Eye, Edit3, Tag, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function BlogEditorPage({ initialData, onBack, onSaveSuccess }) {
@@ -61,11 +62,13 @@ export default function BlogEditorPage({ initialData, onBack, onSaveSuccess }) {
       }
 
       setSuccess(true);
+      toast.success(editingId ? 'Blog post updated' : 'Blog post published');
       setTimeout(() => {
         if (onSaveSuccess) onSaveSuccess();
       }, 1000);
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Failed to save blog post');
     } finally {
       setLoading(false);
     }

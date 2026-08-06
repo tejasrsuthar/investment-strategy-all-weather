@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Edit3, Layers } from 'lucide-react';
 import SmallCaseEditorPage from './SmallCaseEditorPage';
 
@@ -39,9 +40,12 @@ export default function SmallCasesManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchItems();
+      if (res.ok) {
+        toast.success('Smallcase strategy deleted');
+        fetchItems();
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete smallcase strategy');
     }
   };
 

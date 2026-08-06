@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Users, KeyRound, UserCheck, UserX, Trash2, Edit3 } from 'lucide-react';
 
 export default function InvestorUsersManager() {
@@ -51,9 +52,12 @@ export default function InvestorUsersManager() {
         },
         body: JSON.stringify({ status: newStatus })
       });
-      if (res.ok) fetchUsers();
+      if (res.ok) {
+        toast.success(`Investor ${user.username} account set to ${newStatus.toUpperCase()}`);
+        fetchUsers();
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to update investor account status');
     }
   };
 

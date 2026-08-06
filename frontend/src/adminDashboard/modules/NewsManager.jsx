@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Plus, Trash2, Edit3 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { Newspaper, Plus, Trash2, Edit3, ExternalLink } from 'lucide-react';
 import NewsEditorPage from './NewsEditorPage';
 
 export default function NewsManager() {
@@ -38,9 +39,12 @@ export default function NewsManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchItems();
+      if (res.ok) {
+        toast.success('News article deleted');
+        fetchItems();
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete news article');
     }
   };
 

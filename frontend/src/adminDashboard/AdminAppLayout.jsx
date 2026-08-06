@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 import { 
   Home, Users, Briefcase, FileText, Settings, Bell, BookOpen, 
   Layers, Search, ChevronRight, ChevronDown, CheckCircle2, Shield, Plus, Sparkles, LogOut, Newspaper, Activity, User, ShieldCheck
@@ -72,11 +73,27 @@ export default function AdminAppLayout() {
 
   const handleLogout = () => {
     localStorage.clear();
+    toast.success('Signed out of Admin Console');
     navigate('/login');
   };
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-sans text-gray-900 flex flex-col md:flex-row">
+      <Toaster 
+        position="bottom-left"
+        toastOptions={{
+          duration: 3500,
+          style: {
+            background: '#18181B',
+            color: '#FFFFFF',
+            borderRadius: '14px',
+            fontSize: '12px',
+            fontWeight: '600',
+            padding: '12px 18px',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)'
+          }
+        }}
+      />
       {/* Zaga Left Sidebar */}
       <aside className="w-full md:w-64 bg-[#F6F6F6] border-r border-[#EBEBEB] p-5 flex flex-col justify-between shrink-0 min-h-screen">
         <div className="space-y-5">

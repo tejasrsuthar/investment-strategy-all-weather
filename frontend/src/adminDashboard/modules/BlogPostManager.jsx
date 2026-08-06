@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { BookOpen, Plus, Trash2, Edit3, Tag } from 'lucide-react';
 import BlogEditorPage from './BlogEditorPage';
 
@@ -43,9 +44,12 @@ export default function BlogPostManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchBlogs();
+      if (res.ok) {
+        toast.success('Blog post deleted');
+        fetchBlogs();
+      }
     } catch (e) {
-      console.error(e);
+      toast.error('Failed to delete blog post');
     }
   };
 
