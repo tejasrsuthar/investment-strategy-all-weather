@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Save, Layers, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function SmallCaseEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -20,7 +21,7 @@ export default function SmallCaseEditorPage({ initialData, onBack, onSaveSuccess
     setError('');
     setSuccess(false);
 
-    const url = editingId ? `http://localhost:8000/api/smallcases/${editingId}` : 'http://localhost:8000/api/smallcases';
+    const url = editingId ? `${API_BASE_URL}/api/smallcases/${editingId}` : `${API_BASE_URL}/api/smallcases`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);

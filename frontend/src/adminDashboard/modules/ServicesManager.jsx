@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Sparkles, Plus, Trash2, Edit3 } from 'lucide-react';
 import ServiceEditorPage from './ServiceEditorPage';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function ServicesManager() {
   const [items, setItems] = useState([]);
@@ -20,7 +21,7 @@ export default function ServicesManager() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/services?page=1&limit=10');
+      const res = await fetch(`${API_BASE_URL}/api/services?page=1&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
@@ -35,7 +36,7 @@ export default function ServicesManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this service?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/services/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/services/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

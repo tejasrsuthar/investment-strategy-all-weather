@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminReportForm() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function AdminReportForm() {
 
   const fetchReport = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/reports?limit=100`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports?limit=100`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -51,7 +52,7 @@ export default function AdminReportForm() {
   const handleSaveReport = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const url = id ? `http://localhost:8000/api/reports/${id}` : 'http://localhost:8000/api/reports';
+    const url = id ? `${API_BASE_URL}/api/reports/${id}` : `${API_BASE_URL}/api/reports`;
     const method = id ? 'PUT' : 'POST';
 
     try {

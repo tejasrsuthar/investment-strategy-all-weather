@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { BookOpen, Plus, Trash2, Edit3, Tag } from 'lucide-react';
 import BlogEditorPage from './BlogEditorPage';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function BlogPostManager() {
   const [blogs, setBlogs] = useState([]);
@@ -23,8 +24,8 @@ export default function BlogPostManager() {
     setLoading(true);
     try {
       const url = selectedTag 
-        ? `http://localhost:8000/api/blogs?page=${page}&limit=10&tag=${encodeURIComponent(selectedTag)}`
-        : `http://localhost:8000/api/blogs?page=${page}&limit=10`;
+        ? `${API_BASE_URL}/api/blogs?page=${page}&limit=10&tag=${encodeURIComponent(selectedTag)}`
+        : `${API_BASE_URL}/api/blogs?page=${page}&limit=10`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -40,7 +41,7 @@ export default function BlogPostManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this blog post?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/blogs/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/blogs/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

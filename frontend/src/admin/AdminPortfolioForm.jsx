@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminPortfolioForm() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function AdminPortfolioForm() {
 
   const fetchStock = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio?limit=100`, {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio?limit=100`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -59,7 +60,7 @@ export default function AdminPortfolioForm() {
   const handleSaveStock = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const url = id ? `http://localhost:8000/api/admin/portfolio/stocks/${id}` : 'http://localhost:8000/api/admin/portfolio/stocks';
+    const url = id ? `${API_BASE_URL}/api/admin/portfolio/stocks/${id}` : `${API_BASE_URL}/api/admin/portfolio/stocks`;
     const method = id ? 'PUT' : 'POST';
 
     try {

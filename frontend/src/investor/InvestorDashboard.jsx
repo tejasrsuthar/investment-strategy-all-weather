@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FileText, Briefcase, Newspaper, Bell, ArrowRight, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function InvestorDashboard() {
   const navigate = useNavigate();
@@ -30,10 +31,10 @@ export default function InvestorDashboard() {
     setLoading(true);
     try {
       const [repRes, portRes, notifRes, newsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/reports?page=1&limit=1', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://localhost:8000/api/portfolio?page=1&limit=1', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://localhost:8000/api/notifications?page=1&limit=5&status=published'),
-        fetch('http://localhost:8000/api/news?page=1&limit=4'),
+        fetch(`${API_BASE_URL}/api/reports?page=1&limit=1`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/portfolio?page=1&limit=1`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/notifications?page=1&limit=5&status=published`),
+        fetch(`${API_BASE_URL}/api/news?page=1&limit=4`),
       ]);
 
       if (repRes.ok) {
@@ -63,7 +64,7 @@ export default function InvestorDashboard() {
 
   const handleStripeCheckout = async (serviceType) => {
     try {
-      const res = await fetch('http://localhost:8000/api/payments/checkout', {
+      const res = await fetch(`${API_BASE_URL}/api/payments/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ export default function InvestorDashboard() {
       });
       const data = await res.json();
       if (data.checkout_url) {
-        const mockWebhookRes = await fetch('http://localhost:8000/api/payments/stripe-webhook', {
+        const mockWebhookRes = await fetch(`${API_BASE_URL}/api/payments/stripe-webhook`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -100,7 +101,7 @@ export default function InvestorDashboard() {
     e.preventDefault();
     setUpiLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/payments/upi-confirm', {
+      const res = await fetch(`${API_BASE_URL}/api/payments/upi-confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

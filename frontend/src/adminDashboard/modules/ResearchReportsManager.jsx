@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { FileText, Plus, Trash2, Edit3, ExternalLink, CheckSquare, Square, ArrowUpDown, Search } from 'lucide-react';
 import ReportEditorPage from './ReportEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function ResearchReportsManager() {
   const [reports, setReports] = useState([]);
@@ -37,7 +38,7 @@ export default function ResearchReportsManager() {
     setLoading(true);
     setSelectedIds([]);
     try {
-      const res = await fetch(`http://localhost:8000/api/reports?page=${page}&limit=10`);
+      const res = await fetch(`${API_BASE_URL}/api/reports?page=${page}&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setReports(data.items || []);
@@ -55,7 +56,7 @@ export default function ResearchReportsManager() {
     const report = reports.find(r => r.id === id);
     if (!report) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/reports/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ export default function ResearchReportsManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this report?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/reports/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -110,7 +111,7 @@ export default function ResearchReportsManager() {
     if (selectedIds.length === 0) return;
     setBulkActionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/reports/bulk-status', {
+      const res = await fetch(`${API_BASE_URL}/api/reports/bulk-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ export default function ResearchReportsManager() {
     if (!window.confirm(`Delete ${selectedIds.length} selected research reports?`)) return;
     setBulkActionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/reports/bulk-delete', {
+      const res = await fetch(`${API_BASE_URL}/api/reports/bulk-delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

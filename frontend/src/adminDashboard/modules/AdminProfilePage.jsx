@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { User, Mail, Lock, Save, CheckCircle2, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function AdminProfilePage({ onBack }) {
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ export default function AdminProfilePage({ onBack }) {
       };
       if (formData.password) payload.password = formData.password;
 
-      const res = await fetch('http://localhost:8000/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

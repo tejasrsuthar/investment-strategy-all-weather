@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { Briefcase, Plus, Trash2, Edit3, CheckSquare, Square, ArrowUpDown, Search } from 'lucide-react';
 import StockEditorPage from './StockEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function PortfolioStocksManager() {
   const [stocks, setStocks] = useState([]);
@@ -37,7 +38,7 @@ export default function PortfolioStocksManager() {
     setLoading(true);
     setSelectedIds([]);
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio?page=${page}&limit=10`);
+      const res = await fetch(`${API_BASE_URL}/api/portfolio?page=${page}&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setStocks(data.items || []);
@@ -54,7 +55,7 @@ export default function PortfolioStocksManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete stock entry?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio/stocks/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -90,7 +91,7 @@ export default function PortfolioStocksManager() {
     if (!window.confirm(`Delete ${selectedIds.length} selected portfolio stock holdings?`)) return;
     setBulkActionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/portfolio/bulk-delete', {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio/bulk-delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

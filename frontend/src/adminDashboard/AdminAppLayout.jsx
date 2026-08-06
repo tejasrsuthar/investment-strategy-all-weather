@@ -16,6 +16,7 @@ import PlatformSettingsManager from './modules/PlatformSettingsManager';
 import NewsManager from './modules/NewsManager';
 import AdminProfilePage from './modules/AdminProfilePage';
 import SystemStatusPage from '../pages/SystemStatusPage';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminAppLayout() {
   const navigate = useNavigate();
@@ -51,10 +52,10 @@ export default function AdminAppLayout() {
     const headers = { 'Authorization': `Bearer ${token}` };
     try {
       const [invRes, repRes, stockRes, blogRes] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/investors?page=1&limit=1', { headers }),
-        fetch('http://localhost:8000/api/reports?page=1&limit=1', { headers }),
-        fetch('http://localhost:8000/api/portfolio?page=1&limit=1', { headers }),
-        fetch('http://localhost:8000/api/blogs?page=1&limit=1'),
+        fetch(`${API_BASE_URL}/api/admin/investors?page=1&limit=1`, { headers }),
+        fetch(`${API_BASE_URL}/api/reports?page=1&limit=1`, { headers }),
+        fetch(`${API_BASE_URL}/api/portfolio?page=1&limit=1`, { headers }),
+        fetch(`${API_BASE_URL}/api/blogs?page=1&limit=1`),
       ]);
       const invData = invRes.ok ? await invRes.json() : {};
       const repData = repRes.ok ? await repRes.json() : {};

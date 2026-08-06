@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Edit3, Layers } from 'lucide-react';
 import SmallCaseEditorPage from './SmallCaseEditorPage';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function SmallCasesManager() {
   const [items, setItems] = useState([]);
@@ -21,7 +22,7 @@ export default function SmallCasesManager() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/smallcases?page=${page}&limit=10`);
+      const res = await fetch(`${API_BASE_URL}/api/smallcases?page=${page}&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
@@ -36,7 +37,7 @@ export default function SmallCasesManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this smallcase?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/smallcases/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/smallcases/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

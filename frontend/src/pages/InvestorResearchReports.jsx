@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, ChevronRight, RefreshCw, Calendar, Download, Search } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function InvestorResearchReports() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function InvestorResearchReports() {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/reports?page=${page}&limit=10`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports?page=${page}&limit=10`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {

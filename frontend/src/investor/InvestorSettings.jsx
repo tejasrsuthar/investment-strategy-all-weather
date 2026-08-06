@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Settings, Sliders, Shield, ArrowLeft, ChevronRight } from 'lucide-react';
 import { z } from 'zod';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const profileSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters long." }).optional().or(z.literal('')),
@@ -58,7 +59,7 @@ export default function InvestorSettings() {
       const payload = { email, phone, address };
       if (password) payload.password = password;
 
-      const res = await fetch('http://localhost:8000/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

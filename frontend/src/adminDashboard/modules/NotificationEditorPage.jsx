@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Bell, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function NotificationEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -20,7 +21,7 @@ export default function NotificationEditorPage({ initialData, onBack, onSaveSucc
     setError('');
     setSuccess(false);
 
-    const url = editingId ? `http://localhost:8000/api/notifications/${editingId}` : 'http://localhost:8000/api/notifications';
+    const url = editingId ? `${API_BASE_URL}/api/notifications/${editingId}` : `${API_BASE_URL}/api/notifications`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Save, Newspaper, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function NewsEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -19,7 +20,7 @@ export default function NewsEditorPage({ initialData, onBack, onSaveSuccess }) {
     setError('');
     setSuccess(false);
 
-    const url = editingId ? `http://localhost:8000/api/news/${editingId}` : 'http://localhost:8000/api/news';
+    const url = editingId ? `${API_BASE_URL}/api/news/${editingId}` : `${API_BASE_URL}/api/news`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, MoreVertical, Plus, ArrowUp, ArrowDown, Search, Settings } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminReports() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function AdminReports() {
   const fetchReports = async () => {
     try {
       // Fetch up to 1000 reports to support client-side search & sorting
-      const res = await fetch(`http://localhost:8000/api/reports?page=1&limit=1000`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -48,7 +49,7 @@ export default function AdminReports() {
 
   const handleReportStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/reports/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ export default function AdminReports() {
 
   const handleDeleteReport = async (id) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/reports/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

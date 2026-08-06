@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Newspaper, Plus, Trash2, Edit3, ExternalLink } from 'lucide-react';
 import NewsEditorPage from './NewsEditorPage';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function NewsManager() {
   const [items, setItems] = useState([]);
@@ -20,7 +21,7 @@ export default function NewsManager() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/news?page=1&limit=10');
+      const res = await fetch(`${API_BASE_URL}/api/news?page=1&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
@@ -35,7 +36,7 @@ export default function NewsManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this news article?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/news/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/news/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

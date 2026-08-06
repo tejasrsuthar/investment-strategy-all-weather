@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, Settings, User as UserIcon, Shield, Sliders } from 'lucide-react';
 import { z } from 'zod';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const profileSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters long." }),
@@ -51,7 +52,7 @@ export default function AdminSettings() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

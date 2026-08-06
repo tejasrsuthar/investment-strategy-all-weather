@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { Bell, Plus, Trash2, Edit3, CheckSquare, Square, RefreshCw, ShieldAlert } from 'lucide-react';
 import NotificationEditorPage from './NotificationEditorPage';
 import NumberedPagination from '../../components/NumberedPagination';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function NotificationsManager() {
   const [items, setItems] = useState([]);
@@ -33,8 +34,8 @@ export default function NotificationsManager() {
     setSelectedIds([]);
     try {
       const url = statusFilter 
-        ? `http://localhost:8000/api/notifications?page=${page}&limit=10&status=${statusFilter}`
-        : `http://localhost:8000/api/notifications?page=${page}&limit=10`;
+        ? `${API_BASE_URL}/api/notifications?page=${page}&limit=10&status=${statusFilter}`
+        : `${API_BASE_URL}/api/notifications?page=${page}&limit=10`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -53,7 +54,7 @@ export default function NotificationsManager() {
     const item = items.find(i => i.id === id);
     if (!item) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/notifications/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export default function NotificationsManager() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this notification?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/notifications/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -112,7 +113,7 @@ export default function NotificationsManager() {
     if (selectedIds.length === 0) return;
     setBulkActionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/notifications/bulk-status', {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/bulk-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export default function NotificationsManager() {
     if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} selected notifications?`)) return;
     setBulkActionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/notifications/bulk-delete', {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/bulk-delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

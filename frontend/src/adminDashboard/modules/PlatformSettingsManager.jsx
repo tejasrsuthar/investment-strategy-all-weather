@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Settings, Save, CheckCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function PlatformSettingsManager() {
   const [settings, setSettings] = useState({ default_page_size: 10, min_password_length: 7 });
@@ -17,7 +18,7 @@ export default function PlatformSettingsManager() {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/settings');
+      const res = await fetch(`${API_BASE_URL}/api/settings`);
       if (res.ok) {
         const data = await res.json();
         setSettings({
@@ -38,7 +39,7 @@ export default function PlatformSettingsManager() {
     setSaved(false);
 
     try {
-      const res = await fetch('http://localhost:8000/api/settings', {
+      const res = await fetch(`${API_BASE_URL}/api/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

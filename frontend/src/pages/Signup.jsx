@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { GoogleLogin } from '@react-oauth/google';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const signupSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters long." }),
@@ -36,7 +37,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/auth/register', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: cleanUsername, password }),
@@ -64,7 +65,7 @@ export default function Signup() {
   const handleGoogleSuccess = async (credential) => {
     setError('');
     try {
-      const res = await fetch('http://localhost:8000/api/auth/google', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credential }),

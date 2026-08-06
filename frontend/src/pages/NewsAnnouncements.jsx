@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Newspaper, ExternalLink, Calendar, RefreshCw, ChevronRight } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function NewsAnnouncements() {
   const [news, setNews] = useState([]);
@@ -15,8 +16,8 @@ export default function NewsAnnouncements() {
     setLoading(true);
     try {
       const [newsRes, notifRes] = await Promise.all([
-        fetch('http://localhost:8000/api/news?page=1&limit=10'),
-        fetch('http://localhost:8000/api/notifications?page=1&limit=10&status=published')
+        fetch(`${API_BASE_URL}/api/news?page=1&limit=10`),
+        fetch(`${API_BASE_URL}/api/notifications?page=1&limit=10&status=published`)
       ]);
 
       if (newsRes.ok) {

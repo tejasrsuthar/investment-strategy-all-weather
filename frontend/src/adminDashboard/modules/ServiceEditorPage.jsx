@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Save, Sparkles, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function ServiceEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -19,7 +20,7 @@ export default function ServiceEditorPage({ initialData, onBack, onSaveSuccess }
     setError('');
     setSuccess(false);
 
-    const url = editingId ? `http://localhost:8000/api/services/${editingId}` : 'http://localhost:8000/api/services';
+    const url = editingId ? `${API_BASE_URL}/api/services/${editingId}` : `${API_BASE_URL}/api/services`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);

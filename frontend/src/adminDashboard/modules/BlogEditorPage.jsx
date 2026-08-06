@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Eye, Edit3, Tag, Sparkles, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function BlogEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -41,7 +42,7 @@ export default function BlogEditorPage({ initialData, onBack, onSaveSuccess }) {
       status: formData.status
     };
 
-    const url = editingId ? `http://localhost:8000/api/blogs/${editingId}` : 'http://localhost:8000/api/blogs';
+    const url = editingId ? `${API_BASE_URL}/api/blogs/${editingId}` : `${API_BASE_URL}/api/blogs`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);

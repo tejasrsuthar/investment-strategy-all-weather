@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Briefcase, ChevronRight, TrendingUp, ShieldCheck, Info } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function InvestorModelPortfolio() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function InvestorModelPortfolio() {
   const fetchPortfolio = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio?page=${page}&limit=10`, {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio?page=${page}&limit=10`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {

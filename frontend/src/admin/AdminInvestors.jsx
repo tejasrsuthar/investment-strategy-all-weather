@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { MoreVertical, Users, FileText, Briefcase, ArrowUp, ArrowDown, Search, Settings } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminInvestors() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function AdminInvestors() {
   const fetchInvestors = async () => {
     try {
       // Fetch up to 1000 investors to allow full client-side search & sorting
-      const res = await fetch(`http://localhost:8000/api/admin/investors?page=1&limit=1000`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -47,7 +48,7 @@ export default function AdminInvestors() {
 
   const handleInvestorStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

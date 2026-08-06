@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Server, Database, Cpu, HardDrive, RefreshCw, CheckCircle2, AlertCircle, Clock, ShieldCheck, Activity } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function SystemStatusPage() {
   const [statusData, setStatusData] = useState(null);
@@ -10,7 +11,7 @@ export default function SystemStatusPage() {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/system/status');
+      const res = await fetch(`${API_BASE_URL}/api/system/status`);
       if (res.ok) {
         const data = await res.json();
         setStatusData(data);

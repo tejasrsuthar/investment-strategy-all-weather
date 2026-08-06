@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Users, KeyRound, UserCheck, UserX, Trash2, Edit3 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function InvestorUsersManager() {
   const [users, setUsers] = useState([]);
@@ -26,7 +27,7 @@ export default function InvestorUsersManager() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors?page=${page}&limit=10`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors?page=${page}&limit=10`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -44,7 +45,7 @@ export default function InvestorUsersManager() {
   const handleToggleStatus = async (user) => {
     const newStatus = user.status === 'active' ? 'disabled' : 'active';
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${user.id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${user.id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export default function InvestorUsersManager() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${pwdModalUser.id}/reset-password`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${pwdModalUser.id}/reset-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ export default function InvestorUsersManager() {
   const handleUpdateUsername = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${editModalUser.id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${editModalUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ export default function InvestorUsersManager() {
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Delete investor user account permanently?')) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

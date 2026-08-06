@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, Settings, ArrowLeft, ShieldAlert, Award, Calendar, Check, X } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminInvestorDetail() {
   const { id } = useParams();
@@ -35,7 +36,7 @@ export default function AdminInvestorDetail() {
 
   const fetchInvestorDetails = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -55,7 +56,7 @@ export default function AdminInvestorDetail() {
 
   const fetchInvestorActivities = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/activities`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}/activities`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -69,7 +70,7 @@ export default function AdminInvestorDetail() {
 
   const updateInvestorStatus = async (status) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ export default function AdminInvestorDetail() {
 
   const handleSaveProfile = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +116,7 @@ export default function AdminInvestorDetail() {
 
   const handleToggleSubscription = async (serviceType, currentActive) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/investors/${id}/subscriptions`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/investors/${id}/subscriptions`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

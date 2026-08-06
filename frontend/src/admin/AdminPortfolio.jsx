@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Users, FileText, Briefcase, Plus, ArrowUp, ArrowDown, Search, Settings } from 'lucide-react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function AdminPortfolio() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function AdminPortfolio() {
   const fetchStocks = async () => {
     try {
       // Fetch up to 1000 stocks to support client-side search & sorting
-      const res = await fetch(`http://localhost:8000/api/portfolio?page=1&limit=1000`, {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -46,7 +47,7 @@ export default function AdminPortfolio() {
 
   const handleDeleteStock = async (id) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/portfolio/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio/stocks/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

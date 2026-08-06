@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Save, Briefcase, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function StockEditorPage({ initialData, onBack, onSaveSuccess }) {
   const [editingId] = useState(initialData?.id || null);
@@ -25,7 +26,7 @@ export default function StockEditorPage({ initialData, onBack, onSaveSuccess }) 
     setError('');
     setSuccess(false);
 
-    const url = editingId ? `http://localhost:8000/api/portfolio/${editingId}` : 'http://localhost:8000/api/portfolio';
+    const url = editingId ? `${API_BASE_URL}/api/portfolio/${editingId}` : `${API_BASE_URL}/api/portfolio`;
     const method = editingId ? 'PUT' : 'POST';
 
     setLoading(true);
