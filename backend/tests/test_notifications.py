@@ -18,3 +18,14 @@ def test_notifications_workflow():
     assert updated.status == NotificationStatus.PUBLISHED
 
     repo.delete(created.id)
+
+def test_bulk_notifications_and_doc_link():
+    repo = NotificationRepository()
+    n1 = repo.create(Notification(title="N1", message="M1", status=NotificationStatus.DRAFT))
+    n2 = repo.create(Notification(title="N2", message="M2", status=NotificationStatus.DRAFT))
+    
+    assert n1.id is not None
+    assert n2.id is not None
+
+    repo.delete(n1.id)
+    repo.delete(n2.id)

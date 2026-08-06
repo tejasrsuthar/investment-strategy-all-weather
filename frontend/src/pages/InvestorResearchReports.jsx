@@ -142,12 +142,24 @@ export default function InvestorResearchReports() {
                     </span>
                     <h2 className="text-2xl font-extrabold text-forest">{selectedReport.title}</h2>
                   </div>
-                  <button 
-                    onClick={() => alert("Downloading full PDF report...")}
-                    className="bg-sand border border-bordercolor hover:border-forest p-2.5 rounded-full text-forest text-xs font-bold flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" /> Download PDF
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {selectedReport.doc_link && (
+                      <a 
+                        href={selectedReport.doc_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-50 border border-blue-200 hover:bg-blue-100 px-3 py-2 rounded-full text-blue-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                      >
+                        <FileText className="w-4 h-4 text-blue-600" /> Open Google Doc
+                      </a>
+                    )}
+                    <button 
+                      onClick={() => alert("Downloading full PDF report...")}
+                      className="bg-sand border border-bordercolor hover:border-forest p-2.5 rounded-full text-forest text-xs font-bold flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" /> Download PDF
+                    </button>
+                  </div>
                 </div>
                 <div className="prose max-w-none text-sm text-forest/90 leading-relaxed whitespace-pre-wrap">
                   {selectedReport.content}

@@ -8,7 +8,7 @@ from app.interfaces.schemas import (
     BlogPostCreate, BlogPostResponse,
     PlatformSettingsUpdate, PlatformSettingsResponse,
     NewsItemCreate, NewsItemResponse,
-    PaginatedResponse
+    PaginatedResponse, BulkStatusRequest, BulkDeleteRequest
 )
 from app.interfaces.dependencies import require_admin, get_current_user
 from app.infrastructure.repositories import (
@@ -118,6 +118,23 @@ def delete_notification(item_id: str, admin: User = Depends(require_admin)):
     if not notification_repo.delete(item_id):
         raise HTTPException(status_code=404, detail="Notification not found")
     return {"message": "Notification deleted successfully"}
+
+@router.post("/notifications/bulk-status")
+def bulk_status_notifications(req: BulkStatusRequest, admin: User = Depends(require_admin)):
+    for item_id in req.ids:
+        existing = notification_repo.get_by_id(item_id)
+        if existing:
+            existing.status = req.status
+            notification_repo.update(item_id, existing)
+    return {"message": f"Updated status for {len(req.ids)} notifications"}
+
+@router.post("/notifications/bulk-delete")
+def bulk_delete_notifications(req: BulkDeleteRequest, admin: User = Depends(require_admin)):
+    deleted_count = 0
+    for item_id in req.ids:
+        if notification_repo.delete(item_id):
+            deleted_count += 1
+    return {"message": f"Deleted {deleted_count} notifications"}
 
 
 # --- Blog Posts Router (with Tags) ---

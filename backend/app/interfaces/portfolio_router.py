@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.interfaces.schemas import StockCreate, StockResponse, PaginatedResponse
+from app.interfaces.schemas import StockCreate, StockResponse, PaginatedResponse, BulkDeleteRequest
 from app.interfaces.dependencies import require_admin, require_portfolio_subscription
 from app.infrastructure.repositories import StockRepository
 from app.domain.entities import Stock, User, UserRole
@@ -79,3 +79,11 @@ def delete_stock(
     if not success:
         raise HTTPException(status_code=404, detail="Stock not found")
     return {"message": "Stock deleted successfully from portfolio"}
+
+@router.post("/bulk-delete")
+def bulk_delete_portfolio(req: BulkDeleteRequest, admin: User = Depends(require_admin)):
+    deleted_count = 0
+    for stock_id in req.ids:
+        if stock_repo.delete(stock_id):
+            deleted_count += 1
+    return {"message": f"Deleted {deleted_count} portfolio stock holdings"}

@@ -84,9 +84,9 @@ export default function AdminAppLayout() {
           <div className="flex items-center justify-between mb-2 px-1">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-[#18181B] rounded-xl flex items-center justify-center text-white font-extrabold text-xs shadow-xs">
-                Z
+                RC
               </div>
-              <span className="font-extrabold text-base tracking-tight text-[#18181B]">Zaga Admin</span>
+              <span className="font-extrabold text-sm tracking-tight text-[#18181B]">Raghuvir Consultants Admin</span>
             </div>
             <div className="px-1.5 py-0.5 bg-white border border-[#E5E5E7] rounded text-[10px] text-gray-500 font-mono shadow-xs">
               ⌘
@@ -237,7 +237,7 @@ export default function AdminAppLayout() {
                     activeTab === 'notifications' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
                   }`}
                 >
-                  <Bell className="w-3.5 h-3.5 text-gray-600" /> Alerts & Announcements
+                  <Bell className="w-3.5 h-3.5 text-gray-600" /> Alerts
                 </button>
 
                 <button
@@ -314,9 +314,9 @@ export default function AdminAppLayout() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-gray-200/70 pb-4">
           <div>
             <div className="flex items-center gap-2 text-xs text-gray-400 font-medium mb-1">
-              <span>Zaga Console</span>
+              <span>Raghuvir Consultants Console</span>
               <ChevronRight className="w-3 h-3 text-gray-300" />
-              <span className="text-gray-800 capitalize font-semibold">{activeTab}</span>
+              <span className="text-gray-800 capitalize font-semibold">{activeTab === 'notifications' ? 'Alerts' : activeTab}</span>
             </div>
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
               Good morning, {adminUsername} 👋

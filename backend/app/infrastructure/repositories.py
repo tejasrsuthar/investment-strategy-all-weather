@@ -99,8 +99,11 @@ class ResearchReportRepository:
         cursor = self.collection.find().sort("published_at", -1).skip(skip).limit(limit)
         return [ResearchReport(**doc) for doc in cursor], total
 
-    def update(self, report_id: str, title: str, content: str) -> Optional[ResearchReport]:
-        self.collection.update_one({"id": report_id}, {"$set": {"title": title, "content": content}})
+    def update(self, report_id: str, title: str, content: str, doc_link: Optional[str] = None) -> Optional[ResearchReport]:
+        update_fields = {"title": title, "content": content}
+        if doc_link is not None:
+            update_fields["doc_link"] = doc_link
+        self.collection.update_one({"id": report_id}, {"$set": update_fields})
         data = self.collection.find_one({"id": report_id})
         return ResearchReport(**data) if data else None
 

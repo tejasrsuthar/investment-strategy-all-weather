@@ -6,6 +6,7 @@ export default function ReportEditorPage({ initialData, onBack, onSaveSuccess })
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     content: initialData?.content || '',
+    doc_link: initialData?.doc_link || '',
     status: initialData?.status || 'published'
   });
   const [loading, setLoading] = useState(false);
@@ -120,6 +121,19 @@ export default function ReportEditorPage({ initialData, onBack, onSaveSuccess })
               <option value="archived">Archived</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
+            Google Doc / External Report Link (Optional)
+          </label>
+          <input
+            type="url"
+            placeholder="e.g. https://docs.google.com/document/d/12345/edit"
+            value={formData.doc_link}
+            onChange={(e) => setFormData({ ...formData, doc_link: e.target.value })}
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-mono text-gray-800 focus:outline-none focus:border-gray-400"
+          />
         </div>
 
         <div>

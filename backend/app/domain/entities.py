@@ -50,6 +50,7 @@ class ResearchReport(BaseModel):
     id: Optional[str] = None
     title: str
     content: str
+    doc_link: Optional[str] = None
     status: ReportStatus = ReportStatus.PUBLISHED
     published_at: datetime = Field(default_factory=datetime.utcnow)
 

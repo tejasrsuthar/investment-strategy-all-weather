@@ -39,12 +39,14 @@ class ProfileUpdateRequest(BaseModel):
 class ResearchReportCreate(BaseModel):
     title: str
     content: str
+    doc_link: Optional[str] = None
     status: Optional[ReportStatus] = ReportStatus.PUBLISHED
 
 class ResearchReportResponse(BaseModel):
     id: str
     title: str
     content: str
+    doc_link: Optional[str] = None
     status: ReportStatus
     published_at: datetime
 
@@ -223,4 +225,12 @@ class NewsItemResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Bulk Operation Schemas
+class BulkStatusRequest(BaseModel):
+    ids: List[str]
+    status: str
+
+class BulkDeleteRequest(BaseModel):
+    ids: List[str]
 
