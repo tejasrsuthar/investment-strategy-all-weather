@@ -10,11 +10,10 @@ echo "🚀 Starting Raghuvir Consultants local dev..."
 # ── Step 1: Kill anything holding the required ports ──────────────────────────
 kill_port() {
   local PORT=$1
-  local PIDS=$(lsof -ti TCP:"$PORT" 2>/dev/null)
+  local PIDS=$(sudo lsof -ti TCP:"$PORT" 2>/dev/null)
   if [ -n "$PIDS" ]; then
     echo "   ⚠️  Killing process(es) on port $PORT: $PIDS"
-    echo "$PIDS" | xargs kill -9 2>/dev/null || true
-    sleep 0.5
+    echo "$PIDS" | xargs sudo kill -9 2>/dev/null || true
   fi
 }
 
@@ -22,6 +21,8 @@ echo "🔧 Clearing ports 5173, 5174, 8000..."
 kill_port 5173
 kill_port 5174
 kill_port 8000
+# Wait for OS to release ports after kill
+sleep 1
 
 # ── Step 2: Stop any existing nginx on our pid ────────────────────────────────
 if [ -f /tmp/nginx-raghuvir-dev.pid ]; then
