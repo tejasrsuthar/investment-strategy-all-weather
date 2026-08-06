@@ -15,6 +15,6 @@ def test_platform_settings():
 def test_system_status_endpoint():
     data = get_system_status()
     assert data["api_status"] == "online"
-    assert data["api_version"] == "2.3.0"
+    assert data["api_version"] == "2.4.0"
     assert "database" in data
     assert "system_metrics" in data
