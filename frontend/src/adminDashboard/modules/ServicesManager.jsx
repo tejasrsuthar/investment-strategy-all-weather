@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Plus, Trash2, Edit3 } from 'lucide-react';
+import ServiceEditorPage from './ServiceEditorPage';
 
 export default function ServicesManager() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ title: '', description: '', price_monthly: '' });
-  const [error, setError] = useState('');
+
+  // Full-page Editor state
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   const token = localStorage.getItem('token');
 
@@ -30,40 +31,6 @@ export default function ServicesManager() {
     }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setError('');
-    const url = editingId ? `http://localhost:8000/api/services/${editingId}` : 'http://localhost:8000/api/services';
-    const method = editingId ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          price_monthly: parseFloat(formData.price_monthly)
-        })
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'Failed to save service');
-      }
-
-      setShowModal(false);
-      setEditingId(null);
-      setFormData({ title: '', description: '', price_monthly: '' });
-      fetchItems();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this service?')) return;
     try {
@@ -77,6 +44,23 @@ export default function ServicesManager() {
     }
   };
 
+  if (showEditor) {
+    return (
+      <ServiceEditorPage
+        initialData={editingItem}
+        onBack={() => {
+          setShowEditor(false);
+          setEditingItem(null);
+        }}
+        onSaveSuccess={() => {
+          setShowEditor(false);
+          setEditingItem(null);
+          fetchItems();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-2xs">
       <div className="flex justify-between items-center mb-6">
@@ -88,9 +72,8 @@ export default function ServicesManager() {
         </div>
         <button
           onClick={() => {
-            setEditingId(null);
-            setFormData({ title: '', description: '', price_monthly: '' });
-            setShowModal(true);
+            setEditingItem(null);
+            setShowEditor(true);
           }}
           className="bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2"
         >
@@ -120,17 +103,18 @@ export default function ServicesManager() {
                   <td className="py-3.5 text-right space-x-2">
                     <button
                       onClick={() => {
-                        setEditingId(item.id);
-                        setFormData({ title: item.title, description: item.description, price_monthly: item.price_monthly });
-                        setShowModal(true);
+                        setEditingItem(item);
+                        setShowEditor(true);
                       }}
                       className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600"
+                      title="Edit Service"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       className="p-1.5 hover:bg-red-50 rounded-lg text-red-600"
+                      title="Delete Service"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -139,62 +123,6 @@ export default function ServicesManager() {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md border border-gray-200 shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">{editingId ? 'Edit Service' : 'New Service'}</h3>
-            {error && <div className="p-3 mb-4 bg-red-50 text-red-600 text-xs rounded-xl">{error}</div>}
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Service Title</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Monthly Price (₹)</label>
-                <input
-                  type="number"
-                  required
-                  value={formData.price_monthly}
-                  onChange={(e) => setFormData({ ...formData, price_monthly: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Description</label>
-                <textarea
-                  required
-                  rows="3"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold text-white bg-gray-900 hover:bg-black rounded-xl"
-                >
-                  Save Service
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>
