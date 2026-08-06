@@ -45,7 +45,10 @@ export default function App() {
   if (isAdminDomain) {
     return (
       <Router>
-        <AdminAppLayout />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<AdminAppLayout />} />
+        </Routes>
       </Router>
     );
   }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Home, Users, Briefcase, FileText, Settings, Bell, BookOpen, 
   Layers, Search, ChevronRight, ChevronDown, CheckCircle2, Shield, Plus, Sparkles, LogOut, Newspaper, Activity, User, ShieldCheck
@@ -16,6 +17,7 @@ import AdminProfilePage from './modules/AdminProfilePage';
 import SystemStatusPage from '../pages/SystemStatusPage';
 
 export default function AdminAppLayout() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [adminUsername, setAdminUsername] = useState('Admin');
   const [stats, setStats] = useState({ investors: 0, reports: 0, stocks: 0, blogs: 0 });
@@ -26,7 +28,7 @@ export default function AdminAppLayout() {
 
   useEffect(() => {
     if (!token) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
     const user = localStorage.getItem('username');
@@ -70,7 +72,7 @@ export default function AdminAppLayout() {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (
