@@ -50,10 +50,10 @@ export default function Login() {
       localStorage.setItem('username', data.username);
       localStorage.setItem('email', data.email);
 
-      if (redirectUrl === 'checkout') {
-        navigate('/investor');
+      if (redirectUrl) {
+        navigate(redirectUrl);
       } else {
-        navigate(data.role === 'admin' ? '/admin' : '/investor');
+        navigate('/');
       }
     } catch (err) {
       setError(err.message);
@@ -82,7 +82,7 @@ export default function Login() {
       localStorage.setItem('username', data.username);
       localStorage.setItem('email', data.email);
 
-      navigate('/investor');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     }

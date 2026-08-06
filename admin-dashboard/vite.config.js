@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5174,
+    strictPort: true,
     allowedHosts: ['app.raghuvircons.local', 'app.raghuvirconsultants.in', 'localhost', '127.0.0.1']
   }
 })
