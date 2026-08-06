@@ -8,7 +8,7 @@ from app.core.security import get_password_hash
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="1.9.0"
+    version="2.0.0"
 )
 
 # Configure CORS
