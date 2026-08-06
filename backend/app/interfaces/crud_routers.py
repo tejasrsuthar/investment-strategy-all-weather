@@ -122,10 +122,7 @@ def delete_notification(item_id: str, admin: User = Depends(require_admin)):
 @router.post("/notifications/bulk-status")
 def bulk_status_notifications(req: BulkStatusRequest, admin: User = Depends(require_admin)):
     for item_id in req.ids:
-        existing = notification_repo.get_by_id(item_id)
-        if existing:
-            existing.status = req.status
-            notification_repo.update(item_id, existing)
+        notification_repo.update_status(item_id, req.status)
     return {"message": f"Updated status for {len(req.ids)} notifications"}
 
 @router.post("/notifications/bulk-delete")

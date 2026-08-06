@@ -278,10 +278,19 @@ class NotificationRepository:
         cursor = self.collection.find(query).sort("created_at", -1).skip(skip).limit(limit)
         return [Notification(**doc) for doc in cursor], total
 
+    def get_by_id(self, item_id: str) -> Optional[Notification]:
+        data = self.collection.find_one({"id": item_id})
+        return Notification(**data) if data else None
+
     def update(self, item_id: str, item_data: Notification) -> Optional[Notification]:
         d = item_data.model_dump(exclude_unset=True)
         d.pop("id", None)
         self.collection.update_one({"id": item_id}, {"$set": d})
+        res = self.collection.find_one({"id": item_id})
+        return Notification(**res) if res else None
+
+    def update_status(self, item_id: str, status: str) -> Optional[Notification]:
+        self.collection.update_one({"id": item_id}, {"$set": {"status": status}})
         res = self.collection.find_one({"id": item_id})
         return Notification(**res) if res else None
 
