@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 80,
+    port: 5174,
     allowedHosts: ['app.raghuvircons.local', 'app.raghuvirconsultants.in', 'localhost', '127.0.0.1']
   }
 })
