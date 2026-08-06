@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Settings, Sliders, Shield, ArrowLeft } from 'lucide-react';
+import { Settings, Sliders, Shield, ArrowLeft, ChevronRight } from 'lucide-react';
 import { z } from 'zod';
 
 const profileSchema = z.object({
@@ -14,6 +14,9 @@ export default function InvestorSettings() {
 
   const [activeTab, setActiveTab] = useState('profile');
   const [username] = useState(localStorage.getItem('username') || '');
+  const [email, setEmail] = useState(localStorage.getItem('email') || '');
+  const [phone, setPhone] = useState(localStorage.getItem('phone') || '');
+  const [address, setAddress] = useState(localStorage.getItem('address') || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,38 +44,41 @@ export default function InvestorSettings() {
     e.preventDefault();
     setError('');
 
-    const validationResult = profileSchema.safeParse({ password });
-    if (!validationResult.success) {
-      setError(validationResult.error.errors[0].message);
-      return;
-    }
-
-    if (!password) {
-      setError("Please enter a new password to update.");
-      return;
+    if (password) {
+      const validationResult = profileSchema.safeParse({ password });
+      if (!validationResult.success) {
+        setError(validationResult.error.errors[0].message);
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
+      const payload = { email, phone, address };
+      if (password) payload.password = password;
+
       const res = await fetch('http://localhost:8000/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          password
-        })
+        body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        showToast("Success", "Password updated successfully!", "success");
-        setPassword('');
-      } else {
+      if (!res.ok) {
         const data = await res.json();
-        setError(data.detail || "Failed to update password");
+        throw new Error(data.detail || "Failed to update profile");
       }
+
+      const data = await res.json();
+      if (data.email) localStorage.setItem('email', data.email);
+      if (phone) localStorage.setItem('phone', phone);
+      if (address) localStorage.setItem('address', address);
+
+      showToast("Profile Updated", "Your profile information has been successfully saved.", "success");
+      setPassword('');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -82,12 +88,18 @@ export default function InvestorSettings() {
 
   return (
     <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-[90vh]">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 text-xs font-semibold text-textmuted mb-4">
+        <Link to="/investor" className="hover:text-forest transition-colors">
+          Investor Dashboard
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 text-textmuted/60" />
+        <span className="text-forest font-bold">Account Settings</span>
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center border-b border-bordercolor pb-6 mb-8">
         <div>
-          <Link to="/investor" className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-textmuted hover:text-forest transition-colors mb-2">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
-          </Link>
           <h1 className="text-4xl font-extrabold text-forest">Account Settings</h1>
         </div>
       </div>
@@ -140,10 +152,40 @@ export default function InvestorSettings() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">New Password</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. investor@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. +91 9876543210"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">Address</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 101 Marine Drive, Mumbai"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-textmuted mb-1">New Password (Optional)</label>
                   <input
                     type="password"
-                    placeholder="Enter new password (min 6 characters)"
+                    placeholder="Enter new password (min 7 chars with !@#$%)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
@@ -155,7 +197,7 @@ export default function InvestorSettings() {
                   disabled={loading}
                   className="btn-forest text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-forest-hover transition-all disabled:opacity-50 mt-4 shadow-md"
                 >
-                  {loading ? 'Updating Password...' : 'Update Password'}
+                  {loading ? 'Saving Profile...' : 'Save Profile Changes'}
                 </button>
               </form>
             </div>

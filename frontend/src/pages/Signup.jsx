@@ -5,7 +5,12 @@ import { GoogleLogin } from '@react-oauth/google';
 
 const signupSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters long." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
+  password: z
+    .string()
+    .min(7, { message: "Password must be at least 7 characters long." })
+    .refine((val) => /[!@#$%]/.test(val), {
+      message: "Password must contain at least one special character (!@#$%).",
+    }),
 });
 
 export default function Signup() {

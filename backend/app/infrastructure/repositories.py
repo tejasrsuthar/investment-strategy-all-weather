@@ -1,12 +1,18 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List, Tuple
-from app.domain.entities import User, ResearchReport, Stock, Subscription, UserStatus, UserRole, ActivityLog
+from app.domain.entities import (
+    User, ResearchReport, Stock, Subscription, UserStatus, UserRole, ActivityLog,
+    SmallcaseItem, ServiceOffering, Notification, BlogPost, PlatformSettings, NewsItem
+)
 from app.infrastructure.db import db
 
 class UserRepository:
     def __init__(self):
         self.collection = db["users"]
+        self.collection.create_index("email")
+        self.collection.create_index("username")
+        self.collection.create_index("created_at")
 
     def create(self, user: User) -> User:
         user_dict = user.model_dump()
@@ -39,12 +45,19 @@ class UserRepository:
         res = self.collection.update_one({"id": user_id}, {"$set": {"hashed_password": hashed_password}})
         return res.modified_count > 0
 
-    def update_profile(self, user_id: str, username: Optional[str] = None, email: Optional[str] = None, hashed_password: Optional[str] = None) -> bool:
+    def update_profile(
+        self, user_id: str, username: Optional[str] = None, email: Optional[str] = None, 
+        phone: Optional[str] = None, address: Optional[str] = None, hashed_password: Optional[str] = None
+    ) -> bool:
         update_fields = {}
         if username:
             update_fields["username"] = username
         if email:
             update_fields["email"] = email
+        if phone is not None:
+            update_fields["phone"] = phone
+        if address is not None:
+            update_fields["address"] = address
         if hashed_password:
             update_fields["hashed_password"] = hashed_password
         if not update_fields:
@@ -52,92 +65,93 @@ class UserRepository:
         res = self.collection.update_one({"id": user_id}, {"$set": update_fields})
         return res.modified_count > 0
 
-    def get_all_paginated(self, page: int, limit: int) -> Tuple[List[User], int]:
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[User], int]:
         total = self.collection.count_documents({})
-        cursor = self.collection.find({}).skip((page - 1) * limit).limit(limit)
-        items = [User(**doc) for doc in cursor]
-        return items, total
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("created_at", -1).skip(skip).limit(limit)
+        return [User(**doc) for doc in cursor], total
+
+    def delete(self, user_id: str) -> bool:
+        res = self.collection.delete_one({"id": user_id})
+        return res.deleted_count > 0
 
 
 class ResearchReportRepository:
     def __init__(self):
         self.collection = db["research_reports"]
+        self.collection.create_index("published_at")
+        self.collection.create_index("status")
 
     def create(self, report: ResearchReport) -> ResearchReport:
-        report_dict = report.model_dump()
-        report_dict["id"] = str(uuid.uuid4())
-        report_dict["published_at"] = datetime.utcnow()
-        self.collection.insert_one(report_dict)
-        return ResearchReport(**report_dict)
+        dict_data = report.model_dump()
+        dict_data["id"] = str(uuid.uuid4())
+        dict_data["published_at"] = datetime.utcnow()
+        self.collection.insert_one(dict_data)
+        return ResearchReport(**dict_data)
 
     def get_by_id(self, report_id: str) -> Optional[ResearchReport]:
         data = self.collection.find_one({"id": report_id})
         return ResearchReport(**data) if data else None
 
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[ResearchReport], int]:
+        total = self.collection.count_documents({})
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("published_at", -1).skip(skip).limit(limit)
+        return [ResearchReport(**doc) for doc in cursor], total
+
     def update(self, report_id: str, title: str, content: str) -> Optional[ResearchReport]:
-        self.collection.update_one(
-            {"id": report_id},
-            {"$set": {"title": title, "content": content}}
-        )
-        return self.get_by_id(report_id)
+        self.collection.update_one({"id": report_id}, {"$set": {"title": title, "content": content}})
+        data = self.collection.find_one({"id": report_id})
+        return ResearchReport(**data) if data else None
 
     def update_status(self, report_id: str, status: str) -> Optional[ResearchReport]:
-        self.collection.update_one(
-            {"id": report_id},
-            {"$set": {"status": status}}
-        )
-        return self.get_by_id(report_id)
+        self.collection.update_one({"id": report_id}, {"$set": {"status": status}})
+        data = self.collection.find_one({"id": report_id})
+        return ResearchReport(**data) if data else None
 
     def delete(self, report_id: str) -> bool:
         res = self.collection.delete_one({"id": report_id})
         return res.deleted_count > 0
 
-    def get_all_paginated(self, page: int, limit: int) -> Tuple[List[ResearchReport], int]:
-        total = self.collection.count_documents({})
-        cursor = self.collection.find({}).sort("published_at", -1).skip((page - 1) * limit).limit(limit)
-        items = [ResearchReport(**doc) for doc in cursor]
-        return items, total
-
 
 class StockRepository:
     def __init__(self):
         self.collection = db["stocks"]
+        self.collection.create_index("added_at")
 
     def create(self, stock: Stock) -> Stock:
-        stock_dict = stock.model_dump()
-        stock_dict["id"] = str(uuid.uuid4())
-        stock_dict["added_at"] = datetime.utcnow()
-        self.collection.insert_one(stock_dict)
-        return Stock(**stock_dict)
+        dict_data = stock.model_dump()
+        dict_data["id"] = str(uuid.uuid4())
+        dict_data["added_at"] = datetime.utcnow()
+        self.collection.insert_one(dict_data)
+        return Stock(**dict_data)
 
     def get_by_id(self, stock_id: str) -> Optional[Stock]:
         data = self.collection.find_one({"id": stock_id})
         return Stock(**data) if data else None
 
-    def update(self, stock_id: str, updated_stock: Stock) -> Optional[Stock]:
-        stock_dict = updated_stock.model_dump(exclude={"id", "added_at"})
-        self.collection.update_one({"id": stock_id}, {"$set": stock_dict})
-        return self.get_by_id(stock_id)
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[Stock], int]:
+        total = self.collection.count_documents({})
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("added_at", -1).skip(skip).limit(limit)
+        return [Stock(**doc) for doc in cursor], total
+
+    def update(self, stock_id: str, stock_data: Stock) -> Optional[Stock]:
+        dict_data = stock_data.model_dump(exclude_unset=True)
+        dict_data.pop("id", None)
+        self.collection.update_one({"id": stock_id}, {"$set": dict_data})
+        data = self.collection.find_one({"id": stock_id})
+        return Stock(**data) if data else None
 
     def delete(self, stock_id: str) -> bool:
         res = self.collection.delete_one({"id": stock_id})
         return res.deleted_count > 0
 
-    def get_all() -> List[Stock]:
-        # non-paginated helper for entire model portfolio calculations
-        cursor = db["stocks"].find({}).sort("added_at", -1)
-        return [Stock(**doc) for doc in cursor]
-
-    def get_all_paginated(self, page: int, limit: int) -> Tuple[List[Stock], int]:
-        total = self.collection.count_documents({})
-        cursor = self.collection.find({}).sort("added_at", -1).skip((page - 1) * limit).limit(limit)
-        items = [Stock(**doc) for doc in cursor]
-        return items, total
-
 
 class SubscriptionRepository:
     def __init__(self):
         self.collection = db["subscriptions"]
+        self.collection.create_index("user_id")
 
     def create_or_update(self, sub: Subscription) -> Subscription:
         sub_dict = sub.model_dump()
@@ -148,7 +162,8 @@ class SubscriptionRepository:
             {"$set": sub_dict},
             upsert=True
         )
-        return Subscription(**sub_dict)
+        data = self.collection.find_one({"user_id": sub.user_id, "service_type": sub.service_type})
+        return Subscription(**data) if data else None
 
     def get_active_subscription(self, user_id: str, service_type: str) -> Optional[Subscription]:
         data = self.collection.find_one({
@@ -159,9 +174,12 @@ class SubscriptionRepository:
         })
         return Subscription(**data) if data else None
 
+
 class ActivityLogRepository:
     def __init__(self):
         self.collection = db["activity_logs"]
+        self.collection.create_index("user_id")
+        self.collection.create_index("timestamp")
 
     def create(self, log: ActivityLog) -> ActivityLog:
         log_dict = log.model_dump()
@@ -173,3 +191,177 @@ class ActivityLogRepository:
     def get_by_user_id(self, user_id: str) -> List[ActivityLog]:
         cursor = self.collection.find({"user_id": user_id}).sort("timestamp", -1)
         return [ActivityLog(**doc) for doc in cursor]
+
+
+class SmallcaseRepository:
+    def __init__(self):
+        self.collection = db["smallcases"]
+        self.collection.create_index("created_at")
+
+    def create(self, item: SmallcaseItem) -> SmallcaseItem:
+        d = item.model_dump()
+        d["id"] = str(uuid.uuid4())
+        d["created_at"] = datetime.utcnow()
+        self.collection.insert_one(d)
+        return SmallcaseItem(**d)
+
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[SmallcaseItem], int]:
+        total = self.collection.count_documents({})
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("created_at", -1).skip(skip).limit(limit)
+        return [SmallcaseItem(**doc) for doc in cursor], total
+
+    def update(self, item_id: str, item_data: SmallcaseItem) -> Optional[SmallcaseItem]:
+        d = item_data.model_dump(exclude_unset=True)
+        d.pop("id", None)
+        self.collection.update_one({"id": item_id}, {"$set": d})
+        res = self.collection.find_one({"id": item_id})
+        return SmallcaseItem(**res) if res else None
+
+    def delete(self, item_id: str) -> bool:
+        res = self.collection.delete_one({"id": item_id})
+        return res.deleted_count > 0
+
+
+class ServiceOfferingRepository:
+    def __init__(self):
+        self.collection = db["service_offerings"]
+        self.collection.create_index("created_at")
+
+    def create(self, item: ServiceOffering) -> ServiceOffering:
+        d = item.model_dump()
+        d["id"] = str(uuid.uuid4())
+        d["created_at"] = datetime.utcnow()
+        self.collection.insert_one(d)
+        return ServiceOffering(**d)
+
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[ServiceOffering], int]:
+        total = self.collection.count_documents({})
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("created_at", -1).skip(skip).limit(limit)
+        return [ServiceOffering(**doc) for doc in cursor], total
+
+    def update(self, item_id: str, item_data: ServiceOffering) -> Optional[ServiceOffering]:
+        d = item_data.model_dump(exclude_unset=True)
+        d.pop("id", None)
+        self.collection.update_one({"id": item_id}, {"$set": d})
+        res = self.collection.find_one({"id": item_id})
+        return ServiceOffering(**res) if res else None
+
+    def delete(self, item_id: str) -> bool:
+        res = self.collection.delete_one({"id": item_id})
+        return res.deleted_count > 0
+
+
+class NotificationRepository:
+    def __init__(self):
+        self.collection = db["notifications"]
+        self.collection.create_index("created_at")
+        self.collection.create_index("status")
+
+    def create(self, item: Notification) -> Notification:
+        d = item.model_dump()
+        d["id"] = str(uuid.uuid4())
+        d["created_at"] = datetime.utcnow()
+        self.collection.insert_one(d)
+        return Notification(**d)
+
+    def get_all_paginated(self, page: int = 1, limit: int = 10, status: Optional[str] = None) -> Tuple[List[Notification], int]:
+        query = {}
+        if status:
+            query["status"] = status
+        total = self.collection.count_documents(query)
+        skip = (page - 1) * limit
+        cursor = self.collection.find(query).sort("created_at", -1).skip(skip).limit(limit)
+        return [Notification(**doc) for doc in cursor], total
+
+    def update(self, item_id: str, item_data: Notification) -> Optional[Notification]:
+        d = item_data.model_dump(exclude_unset=True)
+        d.pop("id", None)
+        self.collection.update_one({"id": item_id}, {"$set": d})
+        res = self.collection.find_one({"id": item_id})
+        return Notification(**res) if res else None
+
+    def delete(self, item_id: str) -> bool:
+        res = self.collection.delete_one({"id": item_id})
+        return res.deleted_count > 0
+
+
+class BlogPostRepository:
+    def __init__(self):
+        self.collection = db["blog_posts"]
+        self.collection.create_index("created_at")
+        self.collection.create_index("tags")
+
+    def create(self, item: BlogPost) -> BlogPost:
+        d = item.model_dump()
+        d["id"] = str(uuid.uuid4())
+        d["created_at"] = datetime.utcnow()
+        self.collection.insert_one(d)
+        return BlogPost(**d)
+
+    def get_all_paginated(self, page: int = 1, limit: int = 10, tag: Optional[str] = None) -> Tuple[List[BlogPost], int]:
+        query = {}
+        if tag:
+            query["tags"] = tag
+        total = self.collection.count_documents(query)
+        skip = (page - 1) * limit
+        cursor = self.collection.find(query).sort("created_at", -1).skip(skip).limit(limit)
+        return [BlogPost(**doc) for doc in cursor], total
+
+    def get_by_id(self, item_id: str) -> Optional[BlogPost]:
+        res = self.collection.find_one({"id": item_id})
+        return BlogPost(**res) if res else None
+
+    def update(self, item_id: str, item_data: BlogPost) -> Optional[BlogPost]:
+        d = item_data.model_dump(exclude_unset=True)
+        d.pop("id", None)
+        self.collection.update_one({"id": item_id}, {"$set": d})
+        res = self.collection.find_one({"id": item_id})
+        return BlogPost(**res) if res else None
+
+    def delete(self, item_id: str) -> bool:
+        res = self.collection.delete_one({"id": item_id})
+        return res.deleted_count > 0
+
+
+class PlatformSettingsRepository:
+    def __init__(self):
+        self.collection = db["platform_settings"]
+
+    def get(self) -> PlatformSettings:
+        res = self.collection.find_one({"id": "global_settings"})
+        if not res:
+            settings = PlatformSettings()
+            self.collection.insert_one(settings.model_dump())
+            return settings
+        return PlatformSettings(**res)
+
+    def update(self, settings: PlatformSettings) -> PlatformSettings:
+        d = settings.model_dump()
+        d["updated_at"] = datetime.utcnow()
+        self.collection.update_one({"id": "global_settings"}, {"$set": d}, upsert=True)
+        return PlatformSettings(**d)
+
+
+class NewsRepository:
+    def __init__(self):
+        self.collection = db["news_items"]
+        self.collection.create_index("created_at")
+
+    def create(self, item: NewsItem) -> NewsItem:
+        d = item.model_dump()
+        d["id"] = str(uuid.uuid4())
+        d["created_at"] = datetime.utcnow()
+        self.collection.insert_one(d)
+        return NewsItem(**d)
+
+    def get_all_paginated(self, page: int = 1, limit: int = 10) -> Tuple[List[NewsItem], int]:
+        total = self.collection.count_documents({})
+        skip = (page - 1) * limit
+        cursor = self.collection.find().sort("created_at", -1).skip(skip).limit(limit)
+        return [NewsItem(**doc) for doc in cursor], total
+
+    def delete(self, item_id: str) -> bool:
+        res = self.collection.delete_one({"id": item_id})
+        return res.deleted_count > 0

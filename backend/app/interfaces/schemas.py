@@ -81,6 +81,8 @@ class InvestorListItem(BaseModel):
     id: str
     username: Optional[str] = None
     email: EmailStr
+    phone: Optional[str] = None
+    address: Optional[str] = None
     role: UserRole
     status: UserStatus
     created_at: datetime
@@ -98,12 +100,122 @@ class PaginatedResponse(BaseModel):
 # Profile Update Schema
 class ProfileUpdateRequest(BaseModel):
     username: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
     password: Optional[str] = None
 
 class AdminInvestorProfileUpdate(BaseModel):
     username: str
     email: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 class AdminInvestorSubscriptionUpdate(BaseModel):
     service_type: ServiceType
     active: bool
+
+# Smallcase Schemas
+class SmallcaseCreate(BaseModel):
+    name: str
+    cagr: float
+    min_investment: float
+    description: str
+
+class SmallcaseResponse(BaseModel):
+    id: str
+    name: str
+    cagr: float
+    min_investment: float
+    description: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# ServiceOffering Schemas
+class ServiceOfferingCreate(BaseModel):
+    title: str
+    description: str
+    price_monthly: float
+    status: Optional[ReportStatus] = ReportStatus.PUBLISHED
+
+class ServiceOfferingResponse(BaseModel):
+    id: str
+    title: str
+    description: str
+    price_monthly: float
+    status: ReportStatus
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Notification Schemas
+class NotificationCreate(BaseModel):
+    title: str
+    message: str
+    status: Optional[str] = "published"
+
+class NotificationResponse(BaseModel):
+    id: str
+    title: str
+    message: str
+    status: str
+    created_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# BlogPost Schemas
+class BlogPostCreate(BaseModel):
+    title: str
+    slug: str
+    markdown_content: str
+    tags: List[str] = Field(default_factory=list)
+    status: Optional[ReportStatus] = ReportStatus.PUBLISHED
+
+class BlogPostResponse(BaseModel):
+    id: str
+    title: str
+    slug: str
+    markdown_content: str
+    tags: List[str]
+    author: str
+    status: ReportStatus
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# PlatformSettings Schemas
+class PlatformSettingsUpdate(BaseModel):
+    default_page_size: int
+    min_password_length: int
+
+class PlatformSettingsResponse(BaseModel):
+    id: str
+    default_page_size: int
+    min_password_length: int
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# NewsItem Schemas
+class NewsItemCreate(BaseModel):
+    title: str
+    summary: str
+    link: Optional[str] = "#"
+
+class NewsItemResponse(BaseModel):
+    id: str
+    title: str
+    summary: str
+    link: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+

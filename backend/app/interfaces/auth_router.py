@@ -13,8 +13,15 @@ from datetime import datetime
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 user_repo = UserRepository()
 
+def validate_password_policy(password: str):
+    if len(password) < 7:
+        raise HTTPException(status_code=400, detail="Password must be at least 7 characters long")
+    if not any(char in "!@#$%" for char in password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character from !@#$%")
+
 @router.post("/register", response_model=TokenResponse)
 def register(req: UserRegisterRequest):
+    validate_password_policy(req.password)
     clean_username = req.username.replace(" ", "")
 
     # Uniqueness check for username
@@ -159,6 +166,7 @@ def reset_password(req: ResetPasswordRequest):
     if not user:
         raise HTTPException(status_code=400, detail="User not found")
         
+    validate_password_policy(req.new_password)
     hashed_pwd = get_password_hash(req.new_password)
     user_repo.update_password(user.id, hashed_pwd)
     return {"message": "Password updated successfully"}

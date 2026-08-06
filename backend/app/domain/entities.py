@@ -29,10 +29,17 @@ class ReportStatus(str, Enum):
     PUBLISHED = "published"
     ARCHIVED = "archived"
 
+class NotificationStatus(str, Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
 class User(BaseModel):
     id: Optional[str] = None
     username: Optional[str] = None
     email: EmailStr
+    phone: Optional[str] = None
+    address: Optional[str] = None
     hashed_password: Optional[str] = None
     google_id: Optional[str] = None
     role: UserRole = UserRole.INVESTOR
@@ -55,6 +62,7 @@ class Stock(BaseModel):
     stop_loss: float
     weightage: float
     transaction_type: TransactionType = TransactionType.BUY
+    sector: Optional[str] = "Equity"
     added_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Subscription(BaseModel):
@@ -73,3 +81,51 @@ class ActivityLog(BaseModel):
     action: str
     description: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class SmallcaseItem(BaseModel):
+    id: Optional[str] = None
+    name: str
+    cagr: float
+    min_investment: float
+    description: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ServiceOffering(BaseModel):
+    id: Optional[str] = None
+    title: str
+    description: str
+    price_monthly: float
+    status: ReportStatus = ReportStatus.PUBLISHED
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Notification(BaseModel):
+    id: Optional[str] = None
+    title: str
+    message: str
+    status: NotificationStatus = NotificationStatus.PUBLISHED
+    created_by: Optional[str] = "Admin"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BlogPost(BaseModel):
+    id: Optional[str] = None
+    title: str
+    slug: str
+    markdown_content: str
+    tags: List[str] = Field(default_factory=list)
+    author: Optional[str] = "Raghuvir Team"
+    status: ReportStatus = ReportStatus.PUBLISHED
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PlatformSettings(BaseModel):
+    id: Optional[str] = "global_settings"
+    default_page_size: int = 10
+    min_password_length: int = 7
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class NewsItem(BaseModel):
+    id: Optional[str] = None
+    title: str
+    summary: str
+    link: Optional[str] = "#"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+

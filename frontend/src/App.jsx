@@ -31,7 +31,24 @@ import AdminSettings from './admin/AdminSettings';
 import InvestorSettings from './investor/InvestorSettings';
 import AdminInvestorDetail from './admin/AdminInvestorDetail';
 
+// New Investor & Admin pages
+import ModelPortfolioPerformance from './pages/ModelPortfolioPerformance';
+import NewsAnnouncements from './pages/NewsAnnouncements';
+import AdminAppLayout from './adminDashboard/AdminAppLayout';
+import InvestorResearchReports from './pages/InvestorResearchReports';
+import InvestorModelPortfolio from './pages/InvestorModelPortfolio';
+
 export default function App() {
+  const isAdminDomain = window.location.hostname === 'app.raghuvircons.local';
+
+  if (isAdminDomain) {
+    return (
+      <Router>
+        <AdminAppLayout />
+      </Router>
+    );
+  }
+
   return (
     <Router>
       <ScrollToTop />
@@ -47,6 +64,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/news" element={<NewsAnnouncements />} />
 
             {/* Auth */}
             <Route path="/login" element={<Login />} />
@@ -56,7 +74,15 @@ export default function App() {
 
             {/* Portals */}
             <Route path="/investor" element={<InvestorDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/investor/services/reports" element={<InvestorResearchReports />} />
+            <Route path="/investor/services/portfolio" element={<InvestorModelPortfolio />} />
+            <Route path="/investor/reports" element={<InvestorResearchReports />} />
+            <Route path="/investor/portfolio" element={<InvestorModelPortfolio />} />
+            <Route path="/investor/settings" element={<InvestorSettings />} />
+
+            {/* Admin Standalone Dashboard (Path fallback & direct route) */}
+            <Route path="/adminDashboard" element={<AdminAppLayout />} />
+            <Route path="/admin" element={<AdminAppLayout />} />
             <Route path="/admin/investors" element={<AdminInvestors />} />
             <Route path="/admin/investors/:id" element={<AdminInvestorDetail />} />
             <Route path="/admin/reports" element={<AdminReports />} />
@@ -66,7 +92,6 @@ export default function App() {
             <Route path="/admin/portfolio/create" element={<AdminPortfolioForm />} />
             <Route path="/admin/portfolio/edit/:id" element={<AdminPortfolioForm />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/investor/settings" element={<InvestorSettings />} />
           </Routes>
         </main>
         <Footer />
