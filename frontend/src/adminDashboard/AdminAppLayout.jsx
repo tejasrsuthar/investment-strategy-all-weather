@@ -17,18 +17,25 @@ export default function AdminAppLayout() {
   const [adminUsername, setAdminUsername] = useState('Admin');
   const [stats, setStats] = useState({ investors: 0, reports: 0, stocks: 0, blogs: 0 });
 
+  const token = localStorage.getItem('token');
+
   useEffect(() => {
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
     const user = localStorage.getItem('username');
     if (user) setAdminUsername(user);
     fetchOverviewStats();
-  }, []);
+  }, [token]);
 
   const fetchOverviewStats = async () => {
+    const headers = { 'Authorization': `Bearer ${token}` };
     try {
       const [invRes, repRes, stockRes, blogRes] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/investors?page=1&limit=1'),
-        fetch('http://localhost:8000/api/reports?page=1&limit=1'),
-        fetch('http://localhost:8000/api/portfolio?page=1&limit=1'),
+        fetch('http://localhost:8000/api/admin/investors?page=1&limit=1', { headers }),
+        fetch('http://localhost:8000/api/reports?page=1&limit=1', { headers }),
+        fetch('http://localhost:8000/api/portfolio?page=1&limit=1', { headers }),
         fetch('http://localhost:8000/api/blogs?page=1&limit=1'),
       ]);
       const invData = invRes.ok ? await invRes.json() : {};
