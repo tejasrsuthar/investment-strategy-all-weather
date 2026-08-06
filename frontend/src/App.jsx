@@ -37,6 +37,7 @@ import NewsAnnouncements from './pages/NewsAnnouncements';
 import AdminAppLayout from './adminDashboard/AdminAppLayout';
 import InvestorResearchReports from './pages/InvestorResearchReports';
 import InvestorModelPortfolio from './pages/InvestorModelPortfolio';
+import SystemStatusPage from './pages/SystemStatusPage';
 
 export default function App() {
   const isAdminDomain = window.location.hostname === 'app.raghuvircons.local';
@@ -65,6 +66,7 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/news" element={<NewsAnnouncements />} />
+            <Route path="/status" element={<SystemStatusPage />} />
 
             {/* Auth */}
             <Route path="/login" element={<Login />} />

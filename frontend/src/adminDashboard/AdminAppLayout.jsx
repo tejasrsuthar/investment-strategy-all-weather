@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home, Users, Briefcase, FileText, Settings, Bell, BookOpen, 
-  Layers, Search, ChevronRight, ChevronDown, CheckCircle2, Shield, Plus, Sparkles, LogOut, ArrowUpRight
+  Layers, Search, ChevronRight, ChevronDown, CheckCircle2, Shield, Plus, Sparkles, LogOut, Newspaper, Activity, User, ShieldCheck
 } from 'lucide-react';
 import SmallCasesManager from './modules/SmallCasesManager';
 import ServicesManager from './modules/ServicesManager';
@@ -11,12 +11,16 @@ import InvestorUsersManager from './modules/InvestorUsersManager';
 import NotificationsManager from './modules/NotificationsManager';
 import BlogPostManager from './modules/BlogPostManager';
 import PlatformSettingsManager from './modules/PlatformSettingsManager';
+import NewsManager from './modules/NewsManager';
+import AdminProfilePage from './modules/AdminProfilePage';
+import SystemStatusPage from '../pages/SystemStatusPage';
 
 export default function AdminAppLayout() {
   const [activeTab, setActiveTab] = useState('home');
   const [adminUsername, setAdminUsername] = useState('Admin');
   const [stats, setStats] = useState({ investors: 0, reports: 0, stocks: 0, blogs: 0 });
-  const [optimizeOpen, setOptimizeOpen] = useState(true);
+  const [profilePopoverOpen, setProfilePopoverOpen] = useState(false);
+  const popoverRef = useRef(null);
 
   const token = localStorage.getItem('token');
 
@@ -29,6 +33,16 @@ export default function AdminAppLayout() {
     if (user) setAdminUsername(user);
     fetchOverviewStats();
   }, [token]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setProfilePopoverOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchOverviewStats = async () => {
     const headers = { 'Authorization': `Bearer ${token}` };
@@ -62,31 +76,31 @@ export default function AdminAppLayout() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-sans text-gray-900 flex flex-col md:flex-row">
       {/* Zaga Left Sidebar */}
-      <aside className="w-full md:w-64 bg-[#F6F6F6] border-r border-[#EBEBEB] p-5 flex flex-col justify-between shrink-0">
-        <div>
+      <aside className="w-full md:w-64 bg-[#F6F6F6] border-r border-[#EBEBEB] p-5 flex flex-col justify-between shrink-0 min-h-screen">
+        <div className="space-y-5">
           {/* Top Brand Logo */}
-          <div className="flex items-center justify-between mb-5 px-1">
+          <div className="flex items-center justify-between mb-2 px-1">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-[#18181B] rounded-xl flex items-center justify-center text-white font-extrabold text-xs shadow-xs">
                 Z
               </div>
-              <span className="font-extrabold text-base tracking-tight text-[#18181B]">Zaga</span>
+              <span className="font-extrabold text-base tracking-tight text-[#18181B]">Zaga Admin</span>
             </div>
             <div className="px-1.5 py-0.5 bg-white border border-[#E5E5E7] rounded text-[10px] text-gray-500 font-mono shadow-xs">
               ⌘
             </div>
           </div>
 
-          {/* + New Project / Article Action Pill Button */}
+          {/* + New Article Action Pill Button */}
           <button 
             onClick={() => setActiveTab('blogs')}
-            className="w-full bg-white border border-[#E5E5E7] hover:bg-gray-50 py-2.5 px-4 rounded-full font-semibold text-xs text-gray-800 flex items-center justify-center gap-1.5 shadow-xs mb-4 transition-all"
+            className="w-full bg-white border border-[#E5E5E7] hover:bg-gray-50 py-2.5 px-4 rounded-full font-semibold text-xs text-gray-800 flex items-center justify-center gap-1.5 shadow-xs transition-all"
           >
             <Plus className="w-4 h-4 text-gray-500" /> New Article
           </button>
 
           {/* Search Box Pill */}
-          <div className="relative mb-6">
+          <div className="relative">
             <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
@@ -99,158 +113,196 @@ export default function AdminAppLayout() {
             </div>
           </div>
 
-          {/* Main Navigation Menu */}
-          <div className="space-y-5">
-            <div>
-              <div className="text-xs font-medium text-gray-400 px-2 pb-2 mb-2 border-b border-[#EBEBEB]">
-                Main Menu
+          {/* Categorized Navigation Hierarchy */}
+          <div className="space-y-4">
+            {/* 1. Dashboard Overview */}
+            <button
+              onClick={() => setActiveTab('home')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
+                activeTab === 'home' 
+                  ? 'bg-white text-gray-900 font-bold shadow-xs' 
+                  : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Home className="w-4 h-4 text-gray-700" /> Dashboard
               </div>
-              <nav className="space-y-1">
-                {/* Active Home Pill */}
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
-                    activeTab === 'home' 
-                      ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                      : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Home className="w-4 h-4 text-gray-700" /> Home
-                  </div>
-                </button>
+            </button>
 
-                {/* Investors */}
-                <button
-                  onClick={() => setActiveTab('investors')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
-                    activeTab === 'investors' 
-                      ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                      : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Users className="w-4 h-4 text-gray-700" /> Investors
-                  </div>
-                  <span className="text-xs font-medium text-gray-400">{stats.investors}</span>
-                </button>
+            {/* 2. Investors */}
+            <button
+              onClick={() => setActiveTab('investors')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
+                activeTab === 'investors' 
+                  ? 'bg-white text-gray-900 font-bold shadow-xs' 
+                  : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Users className="w-4 h-4 text-gray-700" /> Investors
+              </div>
+              <span className="text-xs font-medium text-gray-400">{stats.investors}</span>
+            </button>
 
-                {/* Reports */}
-                <button
-                  onClick={() => setActiveTab('reports')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
-                    activeTab === 'reports' 
-                      ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                      : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="w-4 h-4 text-gray-700" /> Reports
-                  </div>
-                  <span className="text-xs font-medium text-gray-400">{stats.reports}</span>
-                </button>
-
-                {/* Model Portfolio */}
-                <button
-                  onClick={() => setActiveTab('portfolio')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
-                    activeTab === 'portfolio' 
-                      ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                      : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Briefcase className="w-4 h-4 text-gray-700" /> Model Portfolio
-                  </div>
-                  <span className="text-xs font-medium text-gray-400">{stats.stocks}</span>
-                </button>
-
-                {/* Collapsible Sub-menu: Optimize / Core Modules */}
-                <div>
-                  <button
-                    onClick={() => setOptimizeOpen(!optimizeOpen)}
-                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-[#4A4A4A] hover:text-gray-900 font-medium text-xs rounded-full hover:bg-white/50 transition-all"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-gray-700" /> Optimize Modules
-                    </div>
-                    {optimizeOpen ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
-                  </button>
-
-                  {/* Indented Sub-menu Items */}
-                  {optimizeOpen && (
-                    <div className="border-l border-gray-200/80 ml-5 pl-3.5 space-y-1 my-1.5">
-                      <button
-                        onClick={() => setActiveTab('smallcases')}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-full text-xs transition-all ${
-                          activeTab === 'smallcases' 
-                            ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                            : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
-                        }`}
-                      >
-                        <Layers className="w-3.5 h-3.5 text-gray-600" /> Small Cases
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('services')}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-full text-xs transition-all ${
-                          activeTab === 'services' 
-                            ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                            : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
-                        }`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-gray-600" /> Services Offered
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('notifications')}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-full text-xs transition-all ${
-                          activeTab === 'notifications' 
-                            ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                            : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
-                        }`}
-                      >
-                        <Bell className="w-3.5 h-3.5 text-gray-600" /> Broadcast Alerts
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Blog Content */}
+            {/* 3. Site Static Content Group */}
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-3 pb-1 border-b border-[#EBEBEB]">
+                Site Static Content
+              </div>
+              <div className="border-l border-gray-200/80 ml-4 pl-3.5 space-y-1 my-1.5">
                 <button
                   onClick={() => setActiveTab('blogs')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs transition-all ${
-                    activeTab === 'blogs' 
-                      ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                      : 'text-[#4A4A4A] hover:text-gray-900 hover:bg-white/50 font-medium'
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'blogs' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <BookOpen className="w-4 h-4 text-gray-700" /> Content & Articles
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-3.5 h-3.5 text-gray-600" /> Blog Posts
                   </div>
-                  <span className="text-xs font-medium text-gray-400">{stats.blogs}</span>
+                  <span className="text-[10px] text-gray-400 font-mono">{stats.blogs}</span>
                 </button>
-              </nav>
+
+                <button
+                  onClick={() => setActiveTab('services')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'services' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-gray-600" /> Services
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('smallcases')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'smallcases' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5 text-gray-600" /> Smallcases
+                </button>
+              </div>
+            </div>
+
+            {/* 4. Premium Subscription Group */}
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-3 pb-1 border-b border-[#EBEBEB]">
+                Premium Subscription
+              </div>
+              <div className="border-l border-gray-200/80 ml-4 pl-3.5 space-y-1 my-1.5">
+                <button
+                  onClick={() => setActiveTab('reports')}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'reports' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-gray-600" /> Research Reports
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-mono">{stats.reports}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('portfolio')}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'portfolio' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-3.5 h-3.5 text-gray-600" /> Model Portfolio
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-mono">{stats.stocks}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 5. Misc Group */}
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-3 pb-1 border-b border-[#EBEBEB]">
+                Misc
+              </div>
+              <div className="border-l border-gray-200/80 ml-4 pl-3.5 space-y-1 my-1.5">
+                <button
+                  onClick={() => setActiveTab('news')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'news' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <Newspaper className="w-3.5 h-3.5 text-gray-600" /> News Feed
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('notifications')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'notifications' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <Bell className="w-3.5 h-3.5 text-gray-600" /> Alerts & Announcements
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('system-status')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all ${
+                    activeTab === 'system-status' ? 'bg-white text-gray-900 font-bold shadow-xs' : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5 text-emerald-600" /> System Telemetry Status
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Settings & User */}
-        <div className="pt-4 border-t border-[#EBEBEB] space-y-1">
+        {/* Bottom Admin Profile Menu & Popover */}
+        <div className="pt-4 border-t border-[#EBEBEB] relative" ref={popoverRef}>
+          {/* Profile Trigger Button */}
           <button
-            onClick={() => setActiveTab('settings')}
-            className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-full text-xs transition-all ${
-              activeTab === 'settings' 
-                ? 'bg-white text-gray-900 font-bold shadow-xs' 
-                : 'text-[#4A4A4A] hover:text-gray-900 font-medium'
-            }`}
+            onClick={() => setProfilePopoverOpen(!profilePopoverOpen)}
+            className="w-full flex items-center justify-between p-2 rounded-2xl bg-white border border-[#E5E5E7] hover:bg-gray-50 transition-all shadow-xs"
           >
-            <Settings className="w-4 h-4 text-gray-700" /> Platform Settings
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs">
+                {adminUsername.substring(0, 1).toUpperCase()}
+              </div>
+              <div className="text-left">
+                <span className="block text-xs font-bold text-gray-900 leading-tight">{adminUsername}</span>
+                <span className="block text-[10px] text-gray-400">Super Admin</span>
+              </div>
+            </div>
+            <ChevronDown className="w-4 h-4 text-gray-400" />
           </button>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-full text-xs font-medium text-red-600 hover:bg-red-50 transition-all"
-          >
-            <LogOut className="w-4 h-4 text-red-500" /> Sign Out
-          </button>
+
+          {/* Hover / Click Profile Popover Menu */}
+          {profilePopoverOpen && (
+            <div className="absolute bottom-14 left-0 w-full bg-white border border-gray-200 rounded-2xl shadow-lg p-2 z-50 space-y-1">
+              <button
+                onClick={() => {
+                  setActiveTab('admin-profile');
+                  setProfilePopoverOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <User className="w-4 h-4 text-gray-500" /> Edit Admin Profile
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('settings');
+                  setProfilePopoverOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <Settings className="w-4 h-4 text-gray-500" /> Platform Settings
+              </button>
+
+              <div className="border-t border-gray-100 my-1" />
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+              >
+                <LogOut className="w-4 h-4 text-red-500" /> Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -323,12 +375,15 @@ export default function AdminAppLayout() {
         )}
 
         {activeTab === 'investors' && <InvestorUsersManager />}
+        {activeTab === 'blogs' && <BlogPostManager />}
+        {activeTab === 'services' && <ServicesManager />}
+        {activeTab === 'smallcases' && <SmallCasesManager />}
         {activeTab === 'reports' && <ResearchReportsManager />}
         {activeTab === 'portfolio' && <PortfolioStocksManager />}
-        {activeTab === 'smallcases' && <SmallCasesManager />}
-        {activeTab === 'services' && <ServicesManager />}
+        {activeTab === 'news' && <NewsManager />}
         {activeTab === 'notifications' && <NotificationsManager />}
-        {activeTab === 'blogs' && <BlogPostManager />}
+        {activeTab === 'system-status' && <SystemStatusPage />}
+        {activeTab === 'admin-profile' && <AdminProfilePage onBack={() => setActiveTab('home')} />}
         {activeTab === 'settings' && <PlatformSettingsManager />}
       </main>
     </div>

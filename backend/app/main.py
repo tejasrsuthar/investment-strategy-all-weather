@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.interfaces import auth_router, admin_router, reports_router, portfolio_router, payments_router, crud_routers
+from app.interfaces import auth_router, admin_router, reports_router, portfolio_router, payments_router, crud_routers, system_router
 from app.infrastructure.repositories import UserRepository
 from app.domain.entities import User, UserRole, UserStatus
 from app.core.security import get_password_hash
@@ -8,7 +8,7 @@ from app.core.security import get_password_hash
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="1.6.0"
+    version="1.7.0"
 )
 
 # Configure CORS
@@ -27,6 +27,7 @@ app.include_router(reports_router.router, prefix="/api")
 app.include_router(portfolio_router.router, prefix="/api")
 app.include_router(payments_router.router, prefix="/api")
 app.include_router(crud_routers.router, prefix="/api")
+app.include_router(system_router.router, prefix="/api")
 
 @app.on_event("startup")
 def seed_admin():

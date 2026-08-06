@@ -30,6 +30,11 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+class ProfileUpdateRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+
 # Research Report Schemas
 class ResearchReportCreate(BaseModel):
     title: str
