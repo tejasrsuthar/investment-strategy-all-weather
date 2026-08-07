@@ -15,6 +15,24 @@ def test_platform_settings():
 def test_system_status_endpoint():
     data = get_system_status()
     assert data["api_status"] == "online"
-    assert data["api_version"] == "2.8.2"
+    assert data["api_version"] == "2.8.3"
     assert "database" in data
     assert "system_metrics" in data
+
+def test_health_check_and_security_headers():
+    import asyncio
+    import httpx
+    from app.main import app
+
+    async def _run():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+            res = await client.get("/health")
+            assert res.status_code == 200
+            assert res.json()["status"] == "ok"
+            assert res.json()["version"] == "2.8.3"
+            assert "x-content-type-options" in res.headers
+            assert "server" not in res.headers
+
+    asyncio.run(_run())
+
+

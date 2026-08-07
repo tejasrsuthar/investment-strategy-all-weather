@@ -23,14 +23,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         # Remove leaking headers
-        response.headers.pop("Server", None)
-        response.headers.pop("X-Powered-By", None)
+        if "Server" in response.headers:
+            del response.headers["Server"]
+        if "X-Powered-By" in response.headers:
+            del response.headers["X-Powered-By"]
         return response
 
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="2.8.2"
+    version="2.8.3"
 )
 
 # ── Middleware stack (order matters — outermost first) ─────────────────────────
@@ -92,4 +94,11 @@ def seed_admin():
 
 @app.get("/")
 def read_root():
-    return {"message": "Raghuvir Consultants API is running", "version": "2.8.2"}
+    return {"message": "Raghuvir Consultants API is running", "version": "2.8.3"}
+
+@app.get("/health")
+@app.get("/api/health")
+@app.get("/api/system/health")
+def health_check():
+    return {"status": "ok", "version": "2.8.3"}
+
