@@ -1,23 +1,66 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.interfaces import auth_router, admin_router, reports_router, portfolio_router, payments_router, crud_routers, system_router
 from app.infrastructure.repositories import UserRepository
 from app.domain.entities import User, UserRole, UserStatus
 from app.core.security import get_password_hash
+import os
+
+# ── Allowed origins (tightened from "*" for production) ───────────────────────
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost,http://localhost:5173,http://localhost:5174").split(",")
+
+# ── Security headers middleware ────────────────────────────────────────────────
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        # Remove leaking headers
+        response.headers.pop("Server", None)
+        response.headers.pop("X-Powered-By", None)
+        return response
 
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="2.7.0"
+    version="2.8.0"
 )
 
-# Configure CORS
+# ── Middleware stack (order matters — outermost first) ─────────────────────────
+
+# 1. Trusted hosts — blocks Host-header injection attacks
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "api.raghuvirconsultants.in",
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",
+        "*",  # Loosen during local dev; restrict to api.raghuvirconsultants.in in prod
+    ]
+)
+
+# 2. GZip compression — reduces response size by 60-80% for JSON payloads
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# 3. Security headers on all responses
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 4. CORS — restrict to known frontend origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+    max_age=86400,  # Cache preflight for 24h
 )
 
 # Register Routers
@@ -49,4 +92,4 @@ def seed_admin():
 
 @app.get("/")
 def read_root():
-    return {"message": "Raghuvir Consultants API is running"}
+    return {"message": "Raghuvir Consultants API is running", "version": "2.8.0"}

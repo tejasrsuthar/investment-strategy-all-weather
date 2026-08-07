@@ -67,3 +67,8 @@ def get_system_status():
             "python_version": platform.python_version()
         }
     }
+
+@router.get("/health")
+def health_check():
+    """Lightweight health check for Docker HEALTHCHECK and Coolify monitoring."""
+    return {"status": "ok"}
