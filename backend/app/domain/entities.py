@@ -39,6 +39,11 @@ class User(BaseModel):
     username: Optional[str] = None
     email: EmailStr
     phone: Optional[str] = None
+    gender: Optional[str] = None
+    referral_source: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
     address: Optional[str] = None
     hashed_password: Optional[str] = None
     google_id: Optional[str] = None

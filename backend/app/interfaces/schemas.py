@@ -8,6 +8,12 @@ class UserRegisterRequest(BaseModel):
     username: str
     password: str
     email: Optional[str] = None
+    phone: Optional[str] = None
+    gender: Optional[str] = None
+    referral_source: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
 
 class UserLoginRequest(BaseModel):
     email: str

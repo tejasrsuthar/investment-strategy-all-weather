@@ -40,12 +40,18 @@ def register(req: UserRegisterRequest):
     user = User(
         username=clean_username,
         email=email_to_use,
+        phone=req.phone,
+        gender=req.gender,
+        referral_source=req.referral_source,
+        country=req.country,
+        state=req.state,
+        city=req.city,
         hashed_password=hashed_pwd,
         role=UserRole.INVESTOR,
         status=UserStatus.ACTIVE
     )
     created_user = user_repo.create(user)
-    log_activity(created_user.id, created_user.username, "register", "Registered a new investor account without email")
+    log_activity(created_user.id, created_user.username, "register", f"Registered a new investor account (location: {req.city or 'Unknown'}, {req.country or 'Unknown'})")
     
     access_token = create_access_token(data={"sub": created_user.email, "role": created_user.role.value})
     return TokenResponse(

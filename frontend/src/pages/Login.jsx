@@ -14,10 +14,19 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const redirectUrl = searchParams.get('redirect');
+
+  const isErrored = (fieldName) => {
+    if (!error) return false;
+    const lowerErr = error.toLowerCase();
+    if (fieldName === 'email' && (lowerErr.includes('email') || lowerErr.includes('username') || lowerErr.includes('incorrect'))) return true;
+    if (fieldName === 'password' && (lowerErr.includes('password') || lowerErr.includes('incorrect'))) return true;
+    return false;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -99,8 +108,11 @@ export default function Login() {
         <p className="text-sm text-textmuted text-center mb-8">Access your premium advisory portal</p>
 
         {error && (
-          <div className="p-4 mb-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
-            {error}
+          <div className="p-4 mb-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200 flex items-center gap-2">
+            <svg className="w-5 h-5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
           </div>
         )}
 
@@ -113,7 +125,11 @@ export default function Login() {
               placeholder="e.g. admin or investor@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest text-xs font-semibold"
+              className={`w-full px-4 py-3 rounded-xl focus:outline-none text-xs font-semibold transition-colors ${
+                isErrored('email')
+                  ? 'bg-red-50/20 border-2 border-red-500 focus:border-red-600'
+                  : 'bg-sand border border-bordercolor focus:border-forest'
+              }`}
             />
           </div>
           <div>
@@ -121,13 +137,36 @@ export default function Login() {
               <label className="block text-xs font-bold uppercase tracking-widest text-textmuted">Password</label>
               <Link to="/forgot-password" className="text-xs text-textmuted hover:text-forest underline">Forgot password?</Link>
             </div>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full px-4 py-3 pr-10 rounded-xl focus:outline-none transition-colors ${
+                  isErrored('password')
+                    ? 'bg-red-50/20 border-2 border-red-500 focus:border-red-600'
+                    : 'bg-sand border border-bordercolor focus:border-forest'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-textmuted hover:text-forest p-1 focus:outline-none"
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.025 10.025 0 013.122-.863c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <button
