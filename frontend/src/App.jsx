@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import NotFound from './pages/NotFound';
 
 // Investor portal
 import InvestorDashboard from './investor/InvestorDashboard';
@@ -57,6 +58,9 @@ export default function App() {
             <Route path="/investor/reports" element={<InvestorResearchReports />} />
             <Route path="/investor/portfolio" element={<InvestorModelPortfolio />} />
             <Route path="/investor/settings" element={<InvestorSettings />} />
+
+            {/* 404 Fallback */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />

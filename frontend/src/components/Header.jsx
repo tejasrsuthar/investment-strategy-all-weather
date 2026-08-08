@@ -8,7 +8,8 @@ export default function Header() {
 
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
-  const username = localStorage.getItem('username');
+
+  const dashboardPath = role === 'admin' ? '/admin' : '/investor';
 
   const handleLogout = () => {
     localStorage.clear();
@@ -48,14 +49,29 @@ export default function Header() {
           })}
         </div>
 
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-3">
           {token ? (
-            <button
-              onClick={handleLogout}
-              className="bg-transparent border border-bordercolor text-forest text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full hover:bg-sage/40 transition-all"
-            >
-              Logout
-            </button>
+            <>
+              <Link
+                to={dashboardPath}
+                className={`text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full transition-all flex items-center space-x-1.5 ${
+                  location.pathname.startsWith('/investor') || location.pathname.startsWith('/admin')
+                    ? 'bg-forest text-white shadow-sm'
+                    : 'bg-forest/90 text-white hover:bg-forest shadow-sm'
+                }`}
+              >
+                <span>{role === 'admin' ? 'Admin Console' : 'Investor Dashboard'}</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-transparent border border-bordercolor text-forest text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full hover:bg-sage/40 transition-all"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             location.pathname !== '/login' && (
               <Link
@@ -94,15 +110,24 @@ export default function Header() {
             </Link>
           ))}
           {token ? (
-            <button
-              onClick={() => {
-                handleLogout();
-                setMobileMenuOpen(false);
-              }}
-              className="block w-full bg-forest text-white text-xs font-bold uppercase tracking-widest px-5 py-3 rounded-full text-center mt-4"
-            >
-              Logout
-            </button>
+            <div className="pt-2 space-y-2">
+              <Link
+                to={dashboardPath}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full bg-forest text-white text-xs font-bold uppercase tracking-widest px-5 py-3 rounded-full text-center"
+              >
+                {role === 'admin' ? 'Admin Console' : 'Investor Dashboard'} →
+              </Link>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full bg-transparent border border-bordercolor text-forest text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full text-center"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             location.pathname !== '/login' && (
               <Link
