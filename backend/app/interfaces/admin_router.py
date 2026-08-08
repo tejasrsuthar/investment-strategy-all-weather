@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.interfaces.schemas import (
-    UserStatusUpdateRequest, InvestorListItem, PaginatedResponse, 
+    UserStatusUpdateRequest, UserRoleUpdateRequest, InvestorListItem, PaginatedResponse, 
     AdminInvestorProfileUpdate, AdminInvestorSubscriptionUpdate
 )
 from app.interfaces.dependencies import require_admin
@@ -65,6 +65,22 @@ def update_investor_status(
          raise HTTPException(status_code=400, detail="Could not update status")
          
     return {"message": f"Investor status successfully updated to {req.status.value}"}
+
+@router.put("/investors/{investor_id}/role")
+def update_investor_role(
+    investor_id: str,
+    req: UserRoleUpdateRequest,
+    admin: User = Depends(require_admin)
+):
+    user = user_repo.get_by_id(investor_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    success = user_repo.update_role(investor_id, req.role)
+    if not success:
+         raise HTTPException(status_code=400, detail="Could not update role")
+         
+    return {"message": f"User role successfully updated to {req.role.value}"}
 
 @router.get("/investors/{investor_id}", response_model=InvestorListItem)
 def get_investor_detail(

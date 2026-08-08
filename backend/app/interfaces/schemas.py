@@ -90,6 +90,9 @@ class StockResponse(BaseModel):
 class UserStatusUpdateRequest(BaseModel):
     status: UserStatus
 
+class UserRoleUpdateRequest(BaseModel):
+    role: UserRole
+
 class InvestorListItem(BaseModel):
     id: str
     username: Optional[str] = None

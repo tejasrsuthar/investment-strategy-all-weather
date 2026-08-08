@@ -21,3 +21,18 @@ def test_password_policy_invalid_special_char():
         validate_password_policy("Password123^")
     assert exc.value.status_code == 400
     assert "at least one special character" in exc.value.detail
+
+def test_user_role_update():
+    from app.infrastructure.repositories import UserRepository
+    from app.domain.entities import User, UserRole, UserStatus
+    repo = UserRepository()
+    u = User(username="test_role_user", email="role_test@example.com", hashed_password="pwd", role=UserRole.INVESTOR, status=UserStatus.ACTIVE)
+    created = repo.create(u)
+    assert created.role == UserRole.INVESTOR
+    
+    updated = repo.update_role(created.id, UserRole.ADMIN)
+    assert updated is True
+    
+    fetched = repo.get_by_id(created.id)
+    assert fetched.role == UserRole.ADMIN
+    repo.delete(created.id)

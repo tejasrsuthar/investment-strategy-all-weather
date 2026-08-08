@@ -38,7 +38,11 @@ class UserRepository:
         return User(**data) if data else None
 
     def update_status(self, user_id: str, status: UserStatus) -> bool:
-        res = self.collection.update_one({"id": user_id}, {"$set": {"status": status}})
+        res = self.collection.update_one({"id": user_id}, {"$set": {"status": status.value if isinstance(status, UserStatus) else status}})
+        return res.modified_count > 0
+
+    def update_role(self, user_id: str, role: UserRole) -> bool:
+        res = self.collection.update_one({"id": user_id}, {"$set": {"role": role.value if isinstance(role, UserRole) else role}})
         return res.modified_count > 0
 
     def update_password(self, user_id: str, hashed_password: str) -> bool:

@@ -32,7 +32,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app = FastAPI(
     title="Raghuvir Consultants API",
     description="Enterprise Advisory System Backend",
-    version="2.8.8"
+    version="2.8.9"
 )
 
 # ── Middleware stack (order matters — outermost first) ─────────────────────────
@@ -91,14 +91,22 @@ def seed_admin():
         print("Admin user seeded successfully!")
     else:
         user_repo.update_password(existing.id, get_password_hash("admin12345"))
+        user_repo.update_role(existing.id, UserRole.ADMIN)
+
+    # Automatically ensure admin accounts are granted ADMIN role
+    for username_or_email in ["tejassuthar1", "admin"]:
+        user = user_repo.get_by_username(username_or_email) or user_repo.get_by_email(username_or_email)
+        if user and user.role != UserRole.ADMIN:
+            user_repo.update_role(user.id, UserRole.ADMIN)
+            print(f"Promoted user '{username_or_email}' to ADMIN role successfully!")
 
 @app.get("/")
 def read_root():
-    return {"message": "Raghuvir Consultants API is running", "version": "2.8.8"}
+    return {"message": "Raghuvir Consultants API is running", "version": "2.8.9"}
 
 @app.get("/health")
 @app.get("/api/health")
 @app.get("/api/system/health")
 def health_check():
-    return {"status": "ok", "version": "2.8.8"}
+    return {"status": "ok", "version": "2.8.9"}
 
