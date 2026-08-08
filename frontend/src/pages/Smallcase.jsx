@@ -167,7 +167,7 @@ export default function Smallcase() {
 
       {/* FAQ Section */}
       <section className="py-24 px-6 bg-sand border-t border-bordercolor">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-xs font-bold uppercase tracking-[0.3em] text-textmuted mb-4 block">Frequently Asked Questions</span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-forest mb-4">Got questions? We have answers.</h2>
@@ -233,29 +233,40 @@ function FAQAccordion() {
     }
   ];
 
-  return (
-    <div className="space-y-4">
-      {faqs.map((faq, index) => {
-        const isOpen = openIndex === index;
-        return (
-          <div key={index} className="border border-bordercolor bg-white rounded-2xl overflow-hidden transition-all duration-200">
-            <button
-              onClick={() => setOpenIndex(isOpen ? null : index)}
-              className="w-full flex justify-between items-center px-6 py-5 text-left font-bold text-forest hover:bg-sand/40 transition-colors text-sm md:text-base"
-            >
-              <span>{faq.q}</span>
-              <span className="text-xl text-textmuted transition-transform duration-200" style={{ transform: isOpen ? 'rotate(45deg)' : 'none' }}>
-                +
-              </span>
-            </button>
-            {isOpen && (
-              <div className="px-6 pb-5 text-sm text-textmuted leading-relaxed border-t border-bordercolor/10 pt-4 bg-sand/10">
-                {faq.a}
-              </div>
-            )}
+  const half = Math.ceil(faqs.length / 2);
+  const leftFaqs = faqs.slice(0, half);
+  const rightFaqs = faqs.slice(half);
+
+  const renderFaqCard = (faq, index) => {
+    const isOpen = openIndex === index;
+    return (
+      <div key={index} className="border border-bordercolor bg-white rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
+        <button
+          onClick={() => setOpenIndex(isOpen ? null : index)}
+          className="w-full flex justify-between items-center px-6 py-5 text-left font-bold text-forest hover:bg-sand/40 transition-colors text-sm md:text-base"
+        >
+          <span className="pr-4">{faq.q}</span>
+          <span className="text-xl text-textmuted transition-transform duration-200 flex-shrink-0" style={{ transform: isOpen ? 'rotate(45deg)' : 'none' }}>
+            +
+          </span>
+        </button>
+        {isOpen && (
+          <div className="px-6 pb-5 text-sm text-textmuted leading-relaxed border-t border-bordercolor/10 pt-4 bg-sand/10">
+            {faq.a}
           </div>
-        );
-      })}
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+      <div className="space-y-4">
+        {leftFaqs.map((faq, i) => renderFaqCard(faq, i))}
+      </div>
+      <div className="space-y-4">
+        {rightFaqs.map((faq, i) => renderFaqCard(faq, i + half))}
+      </div>
     </div>
   );
 }
