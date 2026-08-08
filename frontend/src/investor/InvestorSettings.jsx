@@ -48,7 +48,8 @@ export default function InvestorSettings() {
     if (password) {
       const validationResult = profileSchema.safeParse({ password });
       if (!validationResult.success) {
-        setError(validationResult.error.errors[0].message);
+        const msg = validationResult.error.issues?.[0]?.message || validationResult.error.errors?.[0]?.message || 'Invalid password';
+        setError(msg);
         return;
       }
     }

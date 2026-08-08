@@ -26,7 +26,8 @@ export default function Login() {
     // Zod validation
     const validationResult = loginSchema.safeParse({ email, password });
     if (!validationResult.success) {
-      setError(validationResult.error.errors[0].message);
+      const msg = validationResult.error.issues?.[0]?.message || validationResult.error.errors?.[0]?.message || 'Invalid email or password';
+      setError(msg);
       return;
     }
 
@@ -41,7 +42,10 @@ export default function Login() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || 'Failed to authenticate');
+        const detailMsg = typeof data.detail === 'string'
+          ? data.detail
+          : (Array.isArray(data.detail) ? (data.detail[0]?.msg || 'Failed to authenticate') : 'Failed to authenticate');
+        throw new Error(detailMsg);
       }
 
       const data = await res.json();

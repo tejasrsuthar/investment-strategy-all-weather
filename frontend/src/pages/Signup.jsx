@@ -30,7 +30,8 @@ export default function Signup() {
     // Zod validation
     const validationResult = signupSchema.safeParse({ username: cleanUsername, password });
     if (!validationResult.success) {
-      setError(validationResult.error.errors[0].message);
+      const msg = validationResult.error.issues?.[0]?.message || validationResult.error.errors?.[0]?.message || 'Invalid username or password';
+      setError(msg);
       return;
     }
 
@@ -45,7 +46,10 @@ export default function Signup() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || 'Registration failed');
+        const detailMsg = typeof data.detail === 'string'
+          ? data.detail
+          : (Array.isArray(data.detail) ? (data.detail[0]?.msg || 'Registration failed') : 'Registration failed');
+        throw new Error(detailMsg);
       }
 
       const data = await res.json();
@@ -121,6 +125,7 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-sand border border-bordercolor rounded-xl focus:outline-none focus:border-forest"
             />
+            <p className="text-[11px] text-textmuted mt-1">Min 7 characters with at least one special character (!@#$%)</p>
           </div>
 
           <button
